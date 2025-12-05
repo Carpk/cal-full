@@ -1,0 +1,29 @@
+body {
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+}
+
+.app {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-sidebar {
+  max-width: 530px;
+}
+
+.col .card {
+  width: '160px';
+}
+
+.fc-event {
+  height: 14px;
+}
+
+.fc-event-title {
+  margin-top: -4px;
+  font-size: 12px;
+}
