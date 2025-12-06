@@ -5,13 +5,10 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
-export default function SidebarEvent({ event }) {
+export default function SidebarEvent({ event, color}) {
   console.log("event id: " + event.id )
   const [employees, setEmployees] = useState([])
   const [inputValue, setInputValue] = useState('');
-  // const colors = ["red", "green", "#848400", "blue"]
-const colors = ["#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080", "#008080", "#FFD700"]
-
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -24,7 +21,7 @@ const colors = ["#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080", "#008080"
   };
   
   return (
-      <Card key={event.id} className='mb-5' style={{width: '10rem', color: colors[event.id] }}>
+      <Card key={event.id} className='mb-5' style={{ color: color }}>
         <Card.Body>
           <Card.Title>{event.title}</Card.Title>
             { employees.map((name, index) => (

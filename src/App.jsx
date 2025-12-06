@@ -2,8 +2,8 @@ import React from "react";
 import { useState, useEffect } from "react";
 import "./App.css";
 import mondaySdk from "monday-sdk-js";
-import "@vibe/core/tokens";
-import { AttentionBox } from "@vibe/core";
+// import "@vibe/core/tokens";
+// import { AttentionBox } from "@vibe/core";
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -28,7 +28,8 @@ const App = () => {
   const [context, setContext] = useState();
   const [currEvents, setCurrEvents] = useState([]);
   const [assignments, setAssignments] = useState([]);
-  const colors = ["red", "green", "#848400", "blue"]
+  // const colors = ["red", "green", "#848400", "blue"]
+  const colors = ["#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080", "#008080", "#FFD700"]
  
 
 
@@ -118,7 +119,7 @@ const App = () => {
           <Row>
             { currEvents.map((event) => (
               <Col>
-                <SidebarEvent key={event.id} event={event} />
+                <SidebarEvent key={event.id} event={event} color={colors[event.id]}/>
               </Col>
             ))}
           </Row>
