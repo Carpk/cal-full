@@ -20,16 +20,20 @@ import interactionPlugin from "@fullcalendar/interaction"
 
 import { INITIAL_EVENTS, createEventId } from './event-utils'
 import SidebarEvent from './components/SidebarEvent'
+import AddJobModal from "./components/AddJobModal";
 
 // Usage of mondaySDK example, for more information visit here: https://developer.monday.com/apps/docs/introduction-to-the-sdk/
 const monday = mondaySdk();
 
 const App = () => {
   const [context, setContext] = useState();
-  const [currEvents, setCurrEvents] = useState([]);
+  const [currJobs, setCurrJobs] = useState([]);
+  const [currentJobs, setCurrentJobs] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [showAddJobModal, setShowAddJobModal] = useState(false);
+  const [eventData, setEventData] = useState({})
   // const colors = ["red", "green", "#848400", "blue"]
-  const colors = ["#FF0000", "#0000FF", "#00FF00", "#FFA500", "#800080", "#008080", "#FFD700"]
+  const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
  
 
 
@@ -45,22 +49,26 @@ const App = () => {
   }, []);
 
   function handleDateSelect(selectInfo) {
-    let title = prompt('Please enter a new title for your event')
-    let calendarApi = selectInfo.view.calendar
+    console.log(selectInfo)
+    setEventData(selectInfo)
+    setShowAddJobModal(true)
 
-    calendarApi.unselect() // clear date selection
-    const eventId = createEventId()
+    // let title = prompt('Please enter a new title for your event')
+    // let calendarApi = selectInfo.view.calendar
 
-    if (title) {
-      calendarApi.addEvent({
-        id: eventId,
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: selectInfo.allDay,
-        backgroundColor: colors[eventId]
-      })
-    }
+    // calendarApi.unselect() // clear date selection
+    // const eventId = createEventId()
+
+    // if (title) {
+    //   calendarApi.addEvent({
+    //     id: eventId,
+    //     title,
+    //     start: selectInfo.startStr,
+    //     end: selectInfo.endStr,
+    //     allDay: selectInfo.allDay,
+    //     backgroundColor: colors[eventId]
+    //   })
+    // }
   }
 
   const handleDateClick = (arg) => {
@@ -68,14 +76,43 @@ const App = () => {
   }
 
   function handleEvents(events) {
-    setCurrEvents(events)
+    setCurrJobs(events)
   }
+
+  function handleModalClose() {
+    setShowAddJobModal(false)
+  }
+
+  const toggleModal = () => {
+    setShowAddJobModal(!showAddJobModal);
+  };
+
+  const handleJobData = (data) => {
+    console.log(data)
+    setCurrentJobs(data);
+  };
+
 
   return (
     <div className='cal-app'>
-      <Sidebar
-        currEvents={currEvents}
-      />
+      <div className='app-sidebar'>
+        <div className='app-sidebar-section'>
+          <h2>BWS Scheduling</h2>
+        </div>
+
+        <div className='app-sidebar-section'>
+        </div>
+        <div className='app-sidebar-section'>
+          <h2>Jobs ({ currJobs.length})</h2>
+          <div className="row">
+            { currJobs.map((event) => (
+              <div className="col">
+                <SidebarEvent key={event.id} event={event} divor={colors[event.id]}/>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
       <div className='cal-app-main'>
         <FullCalendar
           plugins={[ dayGridPlugin, interactionPlugin ]}
@@ -88,46 +125,14 @@ const App = () => {
           eventsSet={handleEvents} // called after events are initialized/added/changed/removed
         />
       </div>
+       <AddJobModal 
+        showAddJobs={showAddJobModal} 
+        handleClose={toggleModal}
+        eventData={eventData}
+        onDataReceived={handleJobData}
+      />
     </div>
   );
-
-  function renderEventContent(eventInfo) {
-    return (
-      <>
-        <b>{eventInfo.timeText}</b>
-        <i>{eventInfo.event.title}</i>
-      </>
-    )
-  }
-
-  function Sidebar({ currEvents }) {
-    return (
-      <div className='app-sidebar'>
-        <div className='app-sidebar-section'>
-          <h2>Instructions</h2>
-          <ul>
-            <li>Select dates and you will be prompted to create a new event</li>
-            <li>Drag, drop, and resize events</li>
-            <li>Click an event to delete it</li>
-          </ul>
-        </div>
-
-        <div className='app-sidebar-section'>
-        </div>
-        <div className='app-sidebar-section'>
-          <h2>Jobs ({ currEvents.length})</h2>
-          <Row>
-            { currEvents.map((event) => (
-              <Col>
-                <SidebarEvent key={event.id} event={event} color={colors[event.id]}/>
-              </Col>
-            ))}
-          </Row>
-        </div>
-
-      </div>
-    )
-  }
 };
 
 export default App;
