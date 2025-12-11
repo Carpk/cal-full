@@ -28,7 +28,7 @@ const monday = mondaySdk();
 const App = () => {
   const [context, setContext] = useState();
   const [currJobs, setCurrJobs] = useState([]);
-  const [currentJobs, setCurrentJobs] = useState([]);
+  const [currentJobs, setCurrentJobs] = useState(["MSI", "MSU"]);
   const [assignments, setAssignments] = useState([]);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [eventData, setEventData] = useState({})
@@ -72,7 +72,7 @@ const App = () => {
   }
 
   const handleDateClick = (arg) => {
-    alert(arg.dateStr)
+    // alert(arg.dateStr)
   }
 
   function handleEvents(events) {
@@ -87,9 +87,32 @@ const App = () => {
     setShowAddJobModal(!showAddJobModal);
   };
 
+  const sampleDiv = () => {
+    return (
+      <div className="row">
+        <div className="col">
+          test
+        </div>
+        <div className="col">
+          test
+        </div>
+        <div className="col">
+          test
+        </div>
+      </div>
+    )
+  }
   const handleJobData = (data) => {
-    console.log(data)
-    setCurrentJobs(data);
+    const targetDate = data['startStr']
+    const elements = document.querySelectorAll(`[data-date="${targetDate}"]`);
+
+    const template = '<div class="col"></div><div class="col"></div><div class="col"></div>';
+    const jobBox = elements[0].lastChild.childNodes[1]
+    // elements[0].lastChild.lastChild.innerHTML = "hi";
+    jobBox.classList.add("row");
+    jobBox.innerHTML = template
+    
+    console.log(jobBox);
   };
 
 
@@ -130,6 +153,7 @@ const App = () => {
         handleClose={toggleModal}
         eventData={eventData}
         onDataReceived={handleJobData}
+        existingJobs={currentJobs}
       />
     </div>
   );
