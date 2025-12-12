@@ -26,6 +26,7 @@ const App = () => {
   const [assignments, setAssignments] = useState([]);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [eventData, setEventData] = useState({})
+  const [datesHash, setDatesHash] = useState({'fc-21': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
   // const colors = ["red", "green", "#848400", "blue"]
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
   
@@ -42,8 +43,8 @@ const App = () => {
     });
   }, []);
 
-  function handleDateSelect(selectInfo) {
-    console.log(selectInfo)
+  function handleMultipleDates(selectInfo) {
+    // console.log(selectInfo)
     setEventData(selectInfo)
     setShowAddJobModal(true)
 
@@ -65,7 +66,7 @@ const App = () => {
     // }
   }
 
-  const handleDateClick = (arg) => {
+  const handleSingleDate = (arg) => {
     // alert(arg.dateStr)
   }
 
@@ -79,21 +80,42 @@ const App = () => {
     setShowAddJobModal(!showAddJobModal);
   };
 
-  // const sampleDiv = () => {
-  //   return (
-  //     <div className="row">
-  //       <div className="col">
-  //         test
-  //       </div>
-  //       <div className="col">
-  //         test
-  //       </div>
-  //       <div className="col">
-  //         test
-  //       </div>
-  //     </div>
-  //   )
-  // }
+  const sampleDiv = (args) => {
+
+    console.log(args.event)
+
+    
+
+    const data = datesHash['fc-21'] // 'fc-dom-' + ard.dom.id
+    // console.log(args.el.id)
+    
+
+    return (
+      <div className="row" style={{'height': '18px'}}>
+        <div className="col">
+          {data.jobs.map((job) => (
+            <div key={"c0"+job} className="row">
+              <div className="col">
+                {job}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="col">
+          {data.assignees.map((assignee, index) => (
+            <div key={"c1"+index} className="row">
+              <div className="col">
+                {assignee}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="col">
+          test
+        </div>
+      </div>
+    )
+  }
 
   // const handleJobData = (data) => {
   //   const targetDate = data['startStr']
@@ -116,8 +138,6 @@ const App = () => {
     data.color = colors[eventGuid%colors.length]
     console.log(data)
     setCurrentJobs([...currentJobs, data])
-
-
   }
 
 
@@ -157,9 +177,13 @@ const App = () => {
           editable={true}
           selectable={true}
           initialEvents={INITIAL_EVENTS}
-          dateClick={handleDateClick}
-          select={handleDateSelect}
-          eventsSet={handleEvents} // called after events are initialized/added/changed/removed
+          dateClick={handleSingleDate}
+          select={handleMultipleDates}
+          eventsSet={handleEvents} // called after initialized/added/changed/removed
+          // dayHeaderContent={(arg) => <span>{arg.text.toUpperCase()}</span>}
+          eventContent={(arg) => (
+            sampleDiv(arg)
+          )}
         />
       </div>
       {/* <AddJobModal 
