@@ -5,13 +5,6 @@ import mondaySdk from "monday-sdk-js";
 // import "@vibe/core/tokens";
 // import { AttentionBox } from "@vibe/core";
 
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Card from 'react-bootstrap/Card';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
 
 import { formatDate } from '@fullcalendar/core'
 import FullCalendar from '@fullcalendar/react'
@@ -19,22 +12,23 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from "@fullcalendar/interaction"
 
 import { INITIAL_EVENTS, createEventId } from './event-utils'
-import SidebarEvent from './components/SidebarEvent'
+import SidebarJob from './components/SidebarEvent'
 import AddJobModal from "./components/AddJobModal";
+import plusSquare from './assets/plus-square.svg'
 
 // Usage of mondaySDK example, for more information visit here: https://developer.monday.com/apps/docs/introduction-to-the-sdk/
 const monday = mondaySdk();
-
+let eventGuid = 0
 const App = () => {
   const [context, setContext] = useState();
   const [currJobs, setCurrJobs] = useState([]);
-  const [currentJobs, setCurrentJobs] = useState(["MSI", "MSU"]);
+  const [currentJobs, setCurrentJobs] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [eventData, setEventData] = useState({})
   // const colors = ["red", "green", "#848400", "blue"]
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
- 
+  
 
 
   useEffect(() => {
@@ -79,41 +73,52 @@ const App = () => {
     setCurrJobs(events)
   }
 
-  function handleModalClose() {
-    setShowAddJobModal(false)
-  }
 
-  const toggleModal = () => {
+
+  const toggleJobsModal = () => {
     setShowAddJobModal(!showAddJobModal);
   };
 
-  const sampleDiv = () => {
-    return (
-      <div className="row">
-        <div className="col">
-          test
-        </div>
-        <div className="col">
-          test
-        </div>
-        <div className="col">
-          test
-        </div>
-      </div>
-    )
-  }
-  const handleJobData = (data) => {
-    const targetDate = data['startStr']
-    const elements = document.querySelectorAll(`[data-date="${targetDate}"]`);
+  // const sampleDiv = () => {
+  //   return (
+  //     <div className="row">
+  //       <div className="col">
+  //         test
+  //       </div>
+  //       <div className="col">
+  //         test
+  //       </div>
+  //       <div className="col">
+  //         test
+  //       </div>
+  //     </div>
+  //   )
+  // }
 
-    const template = '<div class="col"></div><div class="col"></div><div class="col"></div>';
-    const jobBox = elements[0].lastChild.childNodes[1]
-    // elements[0].lastChild.lastChild.innerHTML = "hi";
-    jobBox.classList.add("row");
-    jobBox.innerHTML = template
+  // const handleJobData = (data) => {
+  //   const targetDate = data['startStr']
+  //   const elements = document.querySelectorAll(`[data-date="${targetDate}"]`);
+
+  //   const template = '<div class="col"></div><div class="col"></div><div class="col"></div>';
+  //   const jobBox = elements[0].lastChild.childNodes[1]
+  //   // elements[0].lastChild.lastChild.innerHTML = "hi";
+  //   jobBox.classList.add("row");
+  //   jobBox.innerHTML = template
     
-    console.log(jobBox);
-  };
+  //   console.log(jobBox);
+  // };
+
+  const handleNewJobData = (data) => {
+    eventGuid = eventGuid + 1
+    console.log(eventGuid)
+
+    data.id = eventGuid
+    data.color = colors[eventGuid%colors.length]
+    console.log(data)
+    setCurrentJobs([...currentJobs, data])
+
+
+  }
 
 
   return (
@@ -126,11 +131,20 @@ const App = () => {
         <div className='app-sidebar-section'>
         </div>
         <div className='app-sidebar-section'>
-          <h2>Jobs ({ currJobs.length})</h2>
           <div className="row">
-            { currJobs.map((event) => (
-              <div className="col">
-                <SidebarEvent key={event.id} event={event} divor={colors[event.id]}/>
+            <div className="col">
+              <h2>Jobs ({currentJobs.length})</h2>
+            </div>
+            <div className="col">
+              <button className='btn-link' onClick={toggleJobsModal} type="button">
+                <img src={plusSquare} alt="add a new job" />
+              </button> 
+            </div>
+          </div>
+          <div className="row">
+            { currentJobs.map((job) => (
+              <div key={job.id} className="col">
+                <SidebarJob job={job} />
               </div>
             ))}
           </div>
@@ -148,12 +162,17 @@ const App = () => {
           eventsSet={handleEvents} // called after events are initialized/added/changed/removed
         />
       </div>
-       <AddJobModal 
+      {/* <AddJobModal 
         showAddJobs={showAddJobModal} 
         handleClose={toggleModal}
         eventData={eventData}
         onDataReceived={handleJobData}
         existingJobs={currentJobs}
+      /> */}
+      <AddJobModal 
+        showAddJobs={showAddJobModal} 
+        handleClose={toggleJobsModal}
+        returnData={handleNewJobData}
       />
     </div>
   );

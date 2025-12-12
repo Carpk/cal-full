@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Modal, Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
@@ -6,10 +6,11 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 
-export default function AddJobModal({ showAddJobs, handleClose, returnData}) {
+export default function AddJobModal({ showAddJobs, handleClose, eventData, onDataReceived, existingJobs}) {
   const [assignees, setAssignees] = useState([]);
   const [inputValue, setInputValue] = useState('');
-  const jobName = useRef(null);
+
+
 
 
   const handleKeyDown = (e) => {
@@ -20,23 +21,21 @@ export default function AddJobModal({ showAddJobs, handleClose, returnData}) {
   };
 
   const handleSubmit = () => {
-    handleClose()
-
-    returnData({title: jobName.current.value, assignees: assignees});
-
-    setAssignees([])
+    onDataReceived(eventData);
+    handleClose();
   };
 
 
   return (
     <Modal show={showAddJobs} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Create Job</Modal.Title>
+        <Modal.Title>Add Job</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3" controlId="formJobName">
-            <Form.Control type="text" ref={jobName} placeholder='Job Name'/>
+            <Form.Label>Job name</Form.Label>
+            <Form.Control type="text"  />
           </Form.Group>
 
           { assignees.map((name, index) => (
@@ -49,6 +48,7 @@ export default function AddJobModal({ showAddJobs, handleClose, returnData}) {
             size="sm"
             type="text"
             value={inputValue}
+            // onSubmit={(e) => console.log(e)}
             onKeyDown={handleKeyDown}
             onChange={(e) => setInputValue(e.target.value)}
           />

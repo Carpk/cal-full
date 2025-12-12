@@ -13,7 +13,7 @@ body {
 
 .app-sidebar {
   max-width: 530px; 
-  padding: 20px;
+  padding: 25px 0px 20px 20px;
   /* max-width: 450px; */
 }
 
@@ -49,3 +49,12 @@ body {
 /* * {
   box-sizing: border-box;
 } */
+
+
+
+
+.btn-link {
+  text-decoration: none;
+  border-color: #0000;
+  background-color: #0000;
+}
