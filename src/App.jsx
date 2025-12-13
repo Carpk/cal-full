@@ -26,7 +26,7 @@ const App = () => {
   const [assignments, setAssignments] = useState([]);
   const [showAddJobModal, setShowAddJobModal] = useState(false);
   const [eventData, setEventData] = useState({})
-  const [datesHash, setDatesHash] = useState({'fc-21': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
+  const [datesHash, setDatesHash] = useState({'Sun Dec 14 2025': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
   // const colors = ["red", "green", "#848400", "blue"]
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
   
@@ -70,9 +70,11 @@ const App = () => {
     // alert(arg.dateStr)
   }
 
-  function handleEvents(events) {
-    setCurrJobs(events)
-  }
+
+
+  // function handleEvents(events) {
+  //   setCurrJobs(events)
+  // }
 
 
 
@@ -82,13 +84,18 @@ const App = () => {
 
   const sampleDiv = (args) => {
 
-    console.log(args.event)
+    let val = args.event._instance.range.start
+    // const parsedDate = Date.parse(val)
+    console.log(val.toDateString())
+    const data = datesHash[val.toDateString()] // "Sun Dec 14 2025"
+    console.log(data)
 
-    
-
-    const data = datesHash['fc-21'] // 'fc-dom-' + ard.dom.id
+    // const data = datesHash['fc-21'] // 'fc-dom-' + ard.dom.id
     // console.log(args.el.id)
     
+    if (data === undefined) {
+      return (<></>)
+    }    
 
     return (
       <div className="row" style={{'height': '18px'}}>
@@ -156,8 +163,12 @@ const App = () => {
               <h2>Jobs ({currentJobs.length})</h2>
             </div>
             <div className="col">
-              <button className='btn-link' onClick={toggleJobsModal} type="button">
-                <img src={plusSquare} alt="add a new job" />
+              <button className='btn-link' style={{'float': 'right'}} onClick={toggleJobsModal} type="button">
+                <img src={plusSquare} 
+                  alt="add a new job"
+                  width="35" 
+                  height="35"
+                />
               </button> 
             </div>
           </div>
@@ -179,7 +190,7 @@ const App = () => {
           initialEvents={INITIAL_EVENTS}
           dateClick={handleSingleDate}
           select={handleMultipleDates}
-          eventsSet={handleEvents} // called after initialized/added/changed/removed
+          // eventsSet={handleEvents} // called after initialized/added/changed/removed
           // dayHeaderContent={(arg) => <span>{arg.text.toUpperCase()}</span>}
           eventContent={(arg) => (
             sampleDiv(arg)
