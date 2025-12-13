@@ -6,41 +6,52 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 
-export default function AddJobModal({ showAddJobs, handleClose, eventData, onDataReceived, existingJobs}) {
-  const [assignees, setAssignees] = useState([]);
+export default function DateModal({ show, date, handleClose, onDateSubmit}) {
+  const [assignees, setAssignees] = useState([["msi"], [], []]);
   const [inputValue, setInputValue] = useState('');
 
-
+  // const [assignees0, setAssignees0] = useState([]);
+  // const [assignees1, setAssignees1] = useState([]);
+  // const [assignees2, setAssignees2] = useState([]);
 
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      setAssignees([...assignees, inputValue])
+      // setAssignees([...assignees, inputValue])
       setInputValue('')
     }
   };
 
   const handleSubmit = () => {
-    onDataReceived(eventData);
+    onDateSubmit(assignees);
     handleClose();
   };
 
 
   return (
-    <Modal show={showAddJobs} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Add Job</Modal.Title>
+        <Modal.Title>{date}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3" controlId="formJobName">
-            <Form.Label>Job name</Form.Label>
-            <Form.Control type="text"  />
+            <Form.Control type="text"  placeholder='Job Name'/>
           </Form.Group>
+          <div className="row">
+            <div className="col">
+              { assignees[0].map((name, index) => (
+                <ListGroup.Item key={index}>{name}</ListGroup.Item>
+              ))}
+            </div>
+            <div className="col">
 
-          { assignees.map((name, index) => (
-              <ListGroup.Item key={index}>{name}</ListGroup.Item>
-          ))}
+            </div>
+            <div className="col">
+
+            </div>
+          </div>
+          
 
           <Form.Control
             aria-label="Small"
@@ -48,7 +59,6 @@ export default function AddJobModal({ showAddJobs, handleClose, eventData, onDat
             size="sm"
             type="text"
             value={inputValue}
-            // onSubmit={(e) => console.log(e)}
             onKeyDown={handleKeyDown}
             onChange={(e) => setInputValue(e.target.value)}
           />

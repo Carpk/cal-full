@@ -13,7 +13,8 @@ import interactionPlugin from "@fullcalendar/interaction"
 
 import { INITIAL_EVENTS, createEventId } from './event-utils'
 import SidebarJob from './components/SidebarEvent'
-import AddJobModal from "./components/AddJobModal";
+import JobModal from "./components/JobModal";
+import DateModal from "./components/DateModal";
 import plusSquare from './assets/plus-square.svg'
 
 // Usage of mondaySDK example, for more information visit here: https://developer.monday.com/apps/docs/introduction-to-the-sdk/
@@ -21,11 +22,14 @@ const monday = mondaySdk();
 let eventGuid = 0
 const App = () => {
   const [context, setContext] = useState();
-  const [currJobs, setCurrJobs] = useState([]);
+  
   const [currentJobs, setCurrentJobs] = useState([]);
-  const [assignments, setAssignments] = useState([]);
-  const [showAddJobModal, setShowAddJobModal] = useState(false);
-  const [eventData, setEventData] = useState({})
+
+  const [showJobModal, setShowJobModal] = useState(false);
+  const [showDateModal, setShowDateModal] = useState(false);
+
+  const [manageDate, setManageDate] = useState()
+
   const [datesHash, setDatesHash] = useState({'Sun Dec 14 2025': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
   // const colors = ["red", "green", "#848400", "blue"]
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
@@ -45,8 +49,8 @@ const App = () => {
 
   function handleMultipleDates(selectInfo) {
     // console.log(selectInfo)
-    setEventData(selectInfo)
-    setShowAddJobModal(true)
+    // setEventData(selectInfo)
+    // setShowJobModal(true)
 
     // let title = prompt('Please enter a new title for your event')
     // let calendarApi = selectInfo.view.calendar
@@ -67,7 +71,10 @@ const App = () => {
   }
 
   const handleSingleDate = (arg) => {
-    // alert(arg.dateStr)
+    console.log(arg.date.toDateString())
+    // arg.date.toDateString()
+    setManageDate(arg.date.toDateString())
+    setShowDateModal(true)
   }
 
 
@@ -79,16 +86,20 @@ const App = () => {
 
 
   const toggleJobsModal = () => {
-    setShowAddJobModal(!showAddJobModal);
+    setShowJobModal(!showJobModal);
   };
 
-  const sampleDiv = (args) => {
+  const toggleDateModal = () => {
+    setShowDateModal(!showDateModal);
+  };
 
+
+  const sampleDiv = (args) => {
     let val = args.event._instance.range.start
     // const parsedDate = Date.parse(val)
-    console.log(val.toDateString())
+    // console.log(val.toDateString())
     const data = datesHash[val.toDateString()] // "Sun Dec 14 2025"
-    console.log(data)
+    // console.log(data)
 
     // const data = datesHash['fc-21'] // 'fc-dom-' + ard.dom.id
     // console.log(args.el.id)
@@ -147,6 +158,12 @@ const App = () => {
     setCurrentJobs([...currentJobs, data])
   }
 
+  const handleDate = (data) => {
+    console.log(data)
+    // setDatesHash({...datesHash, [manageDate]: data})
+    setManageDate(null)
+  }
+
 
   return (
     <div className='cal-app'>
@@ -163,11 +180,12 @@ const App = () => {
               <h2>Jobs ({currentJobs.length})</h2>
             </div>
             <div className="col">
-              <button className='btn-link' style={{'float': 'right'}} onClick={toggleJobsModal} type="button">
+              <button className='btn-link' style={{'float': 'right', 'margin-top': '4px'}} onClick={toggleJobsModal} type="button">
                 <img src={plusSquare} 
                   alt="add a new job"
-                  width="35" 
-                  height="35"
+                  style={{'margin-top': '3px'}}
+                  width="32" 
+                  // height="32"
                 />
               </button> 
             </div>
@@ -189,7 +207,7 @@ const App = () => {
           selectable={true}
           initialEvents={INITIAL_EVENTS}
           dateClick={handleSingleDate}
-          select={handleMultipleDates}
+          // select={handleMultipleDates}
           // eventsSet={handleEvents} // called after initialized/added/changed/removed
           // dayHeaderContent={(arg) => <span>{arg.text.toUpperCase()}</span>}
           eventContent={(arg) => (
@@ -204,10 +222,16 @@ const App = () => {
         onDataReceived={handleJobData}
         existingJobs={currentJobs}
       /> */}
-      <AddJobModal 
-        showAddJobs={showAddJobModal} 
+      <JobModal 
+        show={showJobModal} 
         handleClose={toggleJobsModal}
         returnData={handleNewJobData}
+      />
+      <DateModal 
+        show={showDateModal}
+        date={manageDate}
+        handleClose={toggleDateModal}
+        onDateSubmit={handleDate}
       />
     </div>
   );

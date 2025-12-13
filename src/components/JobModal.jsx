@@ -6,7 +6,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 
-export default function AddJobModal({ showAddJobs, handleClose, returnData}) {
+export default function JobModal({ show, handleClose, returnData}) {
   const [assignees, setAssignees] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const jobName = useRef(null);
@@ -29,7 +29,7 @@ export default function AddJobModal({ showAddJobs, handleClose, returnData}) {
 
 
   return (
-    <Modal show={showAddJobs} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>Create Job</Modal.Title>
       </Modal.Header>
