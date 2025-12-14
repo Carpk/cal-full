@@ -45,30 +45,11 @@ const App = () => {
     monday.listen("context", (res) => {
       setContext(res.data);
     });
-  }, []);
 
-  function handleMultipleDates(selectInfo) {
-    // console.log(selectInfo)
-    // setEventData(selectInfo)
-    // setShowJobModal(true)
+    console.log(datesHash)
+  }, [datesHash]);
 
-    // let title = prompt('Please enter a new title for your event')
-    // let calendarApi = selectInfo.view.calendar
 
-    // calendarApi.unselect() // clear date selection
-    // const eventId = createEventId()
-
-    // if (title) {
-    //   calendarApi.addEvent({
-    //     id: eventId,
-    //     title,
-    //     start: selectInfo.startStr,
-    //     end: selectInfo.endStr,
-    //     allDay: selectInfo.allDay,
-    //     backgroundColor: colors[eventId]
-    //   })
-    // }
-  }
 
   const handleSingleDate = (arg) => {
     console.log(arg.date.toDateString())
@@ -76,12 +57,6 @@ const App = () => {
     setManageDate(arg.date.toDateString())
     setShowDateModal(true)
   }
-
-
-
-  // function handleEvents(events) {
-  //   setCurrJobs(events)
-  // }
 
 
 
@@ -135,18 +110,7 @@ const App = () => {
     )
   }
 
-  // const handleJobData = (data) => {
-  //   const targetDate = data['startStr']
-  //   const elements = document.querySelectorAll(`[data-date="${targetDate}"]`);
 
-  //   const template = '<div class="col"></div><div class="col"></div><div class="col"></div>';
-  //   const jobBox = elements[0].lastChild.childNodes[1]
-  //   // elements[0].lastChild.lastChild.innerHTML = "hi";
-  //   jobBox.classList.add("row");
-  //   jobBox.innerHTML = template
-    
-  //   console.log(jobBox);
-  // };
 
   const handleNewJobData = (data) => {
     eventGuid = eventGuid + 1
@@ -158,9 +122,17 @@ const App = () => {
     setCurrentJobs([...currentJobs, data])
   }
 
-  const handleDate = (data) => {
-    console.log(data)
-    // setDatesHash({...datesHash, [manageDate]: data})
+
+  const handleDateSubmit = (data) => {
+    setDatesHash(prev => ({
+      ...prev, 
+      [manageDate]: {
+        'jobs': [],
+        'assignees': data,
+        'assignees2': []
+      }
+    }));
+    
     setManageDate(null)
   }
 
@@ -215,13 +187,7 @@ const App = () => {
           )}
         />
       </div>
-      {/* <AddJobModal 
-        showAddJobs={showAddJobModal} 
-        handleClose={toggleModal}
-        eventData={eventData}
-        onDataReceived={handleJobData}
-        existingJobs={currentJobs}
-      /> */}
+
       <JobModal 
         show={showJobModal} 
         handleClose={toggleJobsModal}
@@ -231,10 +197,52 @@ const App = () => {
         show={showDateModal}
         date={manageDate}
         handleClose={toggleDateModal}
-        onDateSubmit={handleDate}
+        onDateSubmit={handleDateSubmit}
       />
     </div>
   );
 };
 
 export default App;
+
+
+
+
+  // CODE FOR USING QUERY SELECTORS
+  // const handleJobData = (data) => {
+  //   const targetDate = data['startStr']
+  //   const elements = document.querySelectorAll(`[data-date="${targetDate}"]`);
+
+  //   const template = '<div class="col"></div><div class="col"></div><div class="col"></div>';
+  //   const jobBox = elements[0].lastChild.childNodes[1]
+  //   // elements[0].lastChild.lastChild.innerHTML = "hi";
+  //   jobBox.classList.add("row");
+  //   jobBox.innerHTML = template
+    
+  //   console.log(jobBox);
+  // };
+
+
+  // CODE FOR CREATING FULLCAL EVENT
+  // function handleMultipleDates(selectInfo) {
+  //   console.log(selectInfo)
+  //   setEventData(selectInfo)
+  //   setShowJobModal(true)
+
+  //   let title = prompt('Please enter a new title for your event')
+  //   let calendarApi = selectInfo.view.calendar
+
+  //   calendarApi.unselect() // clear date selection
+  //   const eventId = createEventId()
+
+  //   if (title) {
+  //     calendarApi.addEvent({
+  //       id: eventId,
+  //       title,
+  //       start: selectInfo.startStr,
+  //       end: selectInfo.endStr,
+  //       allDay: selectInfo.allDay,
+  //       backgroundColor: colors[eventId]
+  //     })
+  //   }
+  // }

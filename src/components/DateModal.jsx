@@ -7,7 +7,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 export default function DateModal({ show, date, handleClose, onDateSubmit}) {
-  const [assignees, setAssignees] = useState([["msi"], [], []]);
+  const [assignments, setAssignments] = useState(["jim", "joe", "jon"]);
   const [inputValue, setInputValue] = useState('');
 
   // const [assignees0, setAssignees0] = useState([]);
@@ -17,13 +17,14 @@ export default function DateModal({ show, date, handleClose, onDateSubmit}) {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      // setAssignees([...assignees, inputValue])
+      setAssignments([...assignments, inputValue])
       setInputValue('')
     }
   };
 
   const handleSubmit = () => {
-    onDateSubmit(assignees);
+    onDateSubmit(assignments);
+    setAssignments([]);
     handleClose();
   };
 
@@ -35,35 +36,37 @@ export default function DateModal({ show, date, handleClose, onDateSubmit}) {
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3" controlId="formJobName">
-            <Form.Control type="text"  placeholder='Job Name'/>
-          </Form.Group>
-          <div className="row">
+          
+          <div className="row mb-5">
+            <div className="col"></div>
             <div className="col">
-              { assignees[0].map((name, index) => (
+              { assignments.map((name, index) => (
                 <ListGroup.Item key={index}>{name}</ListGroup.Item>
               ))}
             </div>
-            <div className="col">
-
-            </div>
-            <div className="col">
-
-            </div>
+            <div className="col"></div>
           </div>
           
-
-          <Form.Control
-            aria-label="Small"
-            aria-describedby="inputGroup-sizing-sm"
-            size="sm"
-            type="text"
-            value={inputValue}
-            onKeyDown={handleKeyDown}
-            onChange={(e) => setInputValue(e.target.value)}
-          />
+          <div className="row mb-5">
+            <div className="col"></div>
+            <div className="col">
+              <Form.Control
+                aria-label="Small"
+                aria-describedby="inputGroup-sizing-sm"
+                size="sm"
+                type="text"
+                value={inputValue}
+                onKeyDown={handleKeyDown}
+                onChange={(e) => setInputValue(e.target.value)}
+              />
+              <Form.Group className="mb-3" controlId="formJobName">
+                <Form.Control type="text"  placeholder='not here'/>
+              </Form.Group>
+            </div>
+            <div className="col"></div>
+          </div>
+          
         </Form>
-
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
@@ -76,3 +79,17 @@ export default function DateModal({ show, date, handleClose, onDateSubmit}) {
     </Modal>
   )
 }
+
+
+          // <div className="row mb-5">
+          //   <div className="col">
+          //     { assignments.map((name, index) => (
+          //       <ListGroup.Item key={index}>{name}</ListGroup.Item>
+          //     ))}
+          //   </div>
+          //   <div className="col">
+          //     { assignments.map((name, index) => (
+          //       <ListGroup.Item key={index}>{name}</ListGroup.Item>
+          //     ))}
+          //   </div>
+          // </div>
