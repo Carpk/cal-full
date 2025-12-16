@@ -6,27 +6,45 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 
-export default function DateModal({ show, date, handleClose, onDateSubmit}) {
-  const [assignments, setAssignments] = useState(["jim", "joe", "jon"]);
+export default function DateModal({ show, date, jobsList, assignmentsList1, assignmentsList2, handleClose, onDateSubmit}) {
+  const [jobs, setJobs] = useState(jobsList);
+  const [assignments1, setAssignments1] = useState(assignmentsList1);
+  const [assignments2, setAssignments2] = useState(assignmentsList2);
   const [inputValue, setInputValue] = useState('');
+  const [colOne, setColOne] = useState(true)
+  const [colVal, setColVal] = useState(1)
 
-  // const [assignees0, setAssignees0] = useState([]);
-  // const [assignees1, setAssignees1] = useState([]);
-  // const [assignees2, setAssignees2] = useState([]);
+  // setAssignments(dateData)
+  // console.log(assignments)
+
+
 
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
-      setAssignments([...assignments, inputValue])
+      colOne ? setAssignments1([...assignments1, inputValue]) : setAssignments2([...assignments2, inputValue])
+      // setAssignments([...assignments, inputValue])
       setInputValue('')
     }
   };
 
   const handleSubmit = () => {
-    onDateSubmit(assignments);
-    setAssignments([]);
+    onDateSubmit(jobs,assignments1, assignments2);
+    // setAssignments([[],[],[]]);
     handleClose();
   };
+
+  const handleOptionChange = () => {
+    setColOne(!colOne)
+  }
+
+  const addEle = (index) => {
+
+  }
+
+  const removeEle = (index) => {
+
+  }
 
 
   return (
@@ -38,17 +56,43 @@ export default function DateModal({ show, date, handleClose, onDateSubmit}) {
         <Form>
           
           <div className="row mb-5">
-            <div className="col"></div>
             <div className="col">
-              { assignments.map((name, index) => (
+              { jobs.map((name, index) => (
                 <ListGroup.Item key={index}>{name}</ListGroup.Item>
               ))}
             </div>
-            <div className="col"></div>
+            <div className="col">
+              { assignments1.map((name, index) => (
+                <ListGroup.Item key={index}>{name}</ListGroup.Item>
+              ))}
+            </div>
+            <div className="col">
+              { assignments2.map((name, index) => (
+                <ListGroup.Item key={index}>{name}</ListGroup.Item>
+              ))}
+            </div>
           </div>
           
           <div className="row mb-5">
-            <div className="col"></div>
+            <div className="col">
+              <Form.Check
+                label="1"
+                name="group1"
+                type='radio'
+                checked={colOne}
+                id={`radio-1`}
+                onChange={handleOptionChange}
+                defaultChecked
+              />
+              <Form.Check
+                label="2"
+                name="group1"
+                type='radio'
+                checked={!colOne}
+                id={`radio-2`}
+                onChange={handleOptionChange}
+              />
+            </div>
             <div className="col">
               <Form.Control
                 aria-label="Small"
@@ -58,6 +102,7 @@ export default function DateModal({ show, date, handleClose, onDateSubmit}) {
                 value={inputValue}
                 onKeyDown={handleKeyDown}
                 onChange={(e) => setInputValue(e.target.value)}
+                autoFocus
               />
               <Form.Group className="mb-3" controlId="formJobName">
                 <Form.Control type="text"  placeholder='not here'/>

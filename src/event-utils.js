@@ -6,6 +6,8 @@ let tomorrow = new Date(today);
 tomorrow.setDate(today.getDate() + 1)
 tomorrow = tomorrow.toISOString().replace(/T.*$/, '')
 
+console.log("date string: ", todayStr)
+
 export const INITIAL_EVENTS = [
   // {
   //   id: createEventId(),
@@ -15,12 +17,17 @@ export const INITIAL_EVENTS = [
   {
     id: createEventId(),
     title: 'Timed event',
-    start: todayStr + 'T12:00:00'
+    start: todayStr + 'T12:00:00',
+    jobs: ['msi', 'msu'],
+    assignees: ['bob', 'joe','bert','larry']
   },
   {
     id: createEventId(),
     title: 'Timed event',
-    start: tomorrow + 'T12:00:00'
+    start: tomorrow + 'T12:00:00',
+    jobs: ['msi', 'msu'],
+    assignees: ['bob', 'joe','bert','larry']
+
   }
 ]
 

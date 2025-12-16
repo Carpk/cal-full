@@ -11,11 +11,12 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from "@fullcalendar/interaction"
 
-import { INITIAL_EVENTS, createEventId } from './event-utils'
+// import { INITIAL_EVENTS, createEventId } from './event-utils'
 import SidebarJob from './components/SidebarEvent'
 import JobModal from "./components/JobModal";
 import DateModal from "./components/DateModal";
 import plusSquare from './assets/plus-square.svg'
+
 
 // Usage of mondaySDK example, for more information visit here: https://developer.monday.com/apps/docs/introduction-to-the-sdk/
 const monday = mondaySdk();
@@ -23,13 +24,15 @@ let eventGuid = 0
 const App = () => {
   const [context, setContext] = useState();
   
-  const [currentJobs, setCurrentJobs] = useState([]);
-
   const [showJobModal, setShowJobModal] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
 
+  const [jobDate, setJobDate] = useState()
   const [manageDate, setManageDate] = useState()
 
+  const [jobsData, setJobsData] = useState([]);
+  const [dateData, setDateData] = useState([[],[],[]]);
+  const [currentJobs, setCurrentJobs] = useState([]);
   const [datesHash, setDatesHash] = useState({'Sun Dec 14 2025': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
   // const colors = ["red", "green", "#848400", "blue"]
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
@@ -46,19 +49,8 @@ const App = () => {
       setContext(res.data);
     });
 
-    console.log(datesHash)
-  }, [datesHash]);
 
-
-
-  const handleSingleDate = (arg) => {
-    console.log(arg.date.toDateString())
-    // arg.date.toDateString()
-    setManageDate(arg.date.toDateString())
-    setShowDateModal(true)
-  }
-
-
+  }, []);
 
   const toggleJobsModal = () => {
     setShowJobModal(!showJobModal);
@@ -69,50 +61,31 @@ const App = () => {
   };
 
 
-  const sampleDiv = (args) => {
-    let val = args.event._instance.range.start
-    // const parsedDate = Date.parse(val)
-    // console.log(val.toDateString())
-    const data = datesHash[val.toDateString()] // "Sun Dec 14 2025"
-    // console.log(data)
 
-    // const data = datesHash['fc-21'] // 'fc-dom-' + ard.dom.id
-    // console.log(args.el.id)
-    
-    if (data === undefined) {
-      return (<></>)
-    }    
+  const handleSingleDateClick = (arg) => {
+    // console.log("handle date str: ", arg.date.toISOString().replace(/T.*$/, ''))
+    // arg.date.toDateString()
 
-    return (
-      <div className="row" style={{'height': '18px'}}>
-        <div className="col">
-          {data.jobs.map((job) => (
-            <div key={"c0"+job} className="row">
-              <div className="col">
-                {job}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="col">
-          {data.assignees.map((assignee, index) => (
-            <div key={"c1"+index} className="row">
-              <div className="col">
-                {assignee}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="col">
-          test
-        </div>
-      </div>
-    )
+    const isExisting = arg.dayEl.children[0].children[1].children[0].children.length > 0
+
+    if (isExisting) {
+      const testData = arg.dayEl.children[0].children[1].children[0].children[0].children[0].children
+      // setDateData(arg.dayEl.children[0].children[1].children[0].children[0].children[0].children)
+      // console.log(testData)
+      setDateData([
+        testData[0].innerText.split('\n'), 
+        testData[1].innerText.split('\n'), 
+        testData[2].innerText.split('\n')
+      ])
+    }
+
+    setJobDate(arg.date.toISOString().replace(/T.*$/, '')) // date string:  2025-12-15
+    setManageDate(arg.date.toDateString()) //  date str:  Wed Dec 10 2025
+    setShowDateModal(true)
   }
 
 
-
-  const handleNewJobData = (data) => {
+  const handleJobSubmit = (data) => {
     eventGuid = eventGuid + 1
     console.log(eventGuid)
 
@@ -123,19 +96,67 @@ const App = () => {
   }
 
 
-  const handleDateSubmit = (data) => {
+  const handleDateSubmit = (assignments) => {
+    // console.log(dateData)
+
     setDatesHash(prev => ({
       ...prev, 
       [manageDate]: {
-        'jobs': [],
-        'assignees': data,
-        'assignees2': []
+        id: String(eventGuid),
+        title: 'nTimed evet',
+        start: jobDate + 'T12:00:00',
+        jobs: assignments[0],
+        assignees: assignments[1]
       }
     }));
+
+    setJobsData(prev => ([
+      ...prev,
+      {
+        id: String(eventGuid++),
+        title: 'nTimed evet',
+        start: jobDate + 'T12:00:00',
+        jobs: assignments[0],
+        assignees: assignments[1]
+      }
+    ]))
     
+    setDateData([[],[],[]]);
     setManageDate(null)
   }
 
+
+  const customRender = (args) => {
+    // let val = args.event._instance.range.start
+    const data = args.event.extendedProps
+    // console.log("cus: ", data)
+
+    if (data === undefined) { return (<></>) }    
+
+    return (
+      <div className="row" style={{'height': '18px'}}>
+        <div className="col">
+          {data.jobs.map((job) => (
+            <div key={"j-"+job} className="row">
+              <div className="col">
+                {job}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="col">
+          {data.assignees.map((assignee, index) => (
+            <div key={"e-"+index} className="row">
+              <div className="col">
+                {assignee}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="col"></div>
+      </div>
+    )
+  }
 
   return (
     <div className='cal-app'>
@@ -152,10 +173,10 @@ const App = () => {
               <h2>Jobs ({currentJobs.length})</h2>
             </div>
             <div className="col">
-              <button className='btn-link' style={{'float': 'right', 'margin-top': '4px'}} onClick={toggleJobsModal} type="button">
+              <button className='btn-link' style={{'float': 'right', 'marginTop': '4px'}} onClick={toggleJobsModal} type="button">
                 <img src={plusSquare} 
                   alt="add a new job"
-                  style={{'margin-top': '3px'}}
+                  style={{'marginTop': '3px'}}
                   width="32" 
                   // height="32"
                 />
@@ -177,25 +198,30 @@ const App = () => {
           initialView="dayGridMonth"
           editable={true}
           selectable={true}
-          initialEvents={INITIAL_EVENTS}
-          dateClick={handleSingleDate}
+          // initialEvents={INITIAL_EVENTS}
+          dateClick={handleSingleDateClick}
           // select={handleMultipleDates}
-          // eventsSet={handleEvents} // called after initialized/added/changed/removed
+          // eventsSet={datesHash} // called after initialized/added/changed/removed
           // dayHeaderContent={(arg) => <span>{arg.text.toUpperCase()}</span>}
           eventContent={(arg) => (
-            sampleDiv(arg)
+            customRender(arg)
           )}
+          events={jobsData} 
+          //events={datesHash}
         />
       </div>
 
       <JobModal 
         show={showJobModal} 
         handleClose={toggleJobsModal}
-        returnData={handleNewJobData}
+        returnData={handleJobSubmit}
       />
       <DateModal 
         show={showDateModal}
         date={manageDate}
+        jobsList={dateData[0]}
+        assignmentsList1={dateData[1]}
+        assignmentsList2={dateData[2]}
         handleClose={toggleDateModal}
         onDateSubmit={handleDateSubmit}
       />
@@ -246,3 +272,26 @@ export default App;
   //     })
   //   }
   // }
+
+
+    // HASH STRUCTURE FOR JOBS
+    // console.log(val)
+    // console.log("in cellstruc: ", args)
+    
+    // const parsedDate = Date.parse(val)
+    // console.log(val.toDateString())
+    // const data = datesHash[val.toDateString()] // "Sun Dec 14 2025"
+    // console.log(data)
+
+    // const data = datesHash['fc-21'] // 'fc-dom-' + ard.dom.id
+    // console.log(args.el.id)
+
+    // BUILDING HASH STRUCTURE
+    // setDatesHash(prev => ({
+    //   ...prev, 
+    //   [manageDate]: {
+    //     'jobs': [],
+    //     'assignees': data,
+    //     'assignees2': []
+    //   }
+    // }));
