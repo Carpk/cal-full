@@ -29,11 +29,12 @@ const App = () => {
 
   const [jobDate, setJobDate] = useState()
   const [manageDate, setManageDate] = useState()
+  const [manageId, setManageId] = useState()
 
   const [jobsData, setJobsData] = useState([]);
   const [dateData, setDateData] = useState([[],[],[]]);
   const [currentJobs, setCurrentJobs] = useState([]);
-  const [datesHash, setDatesHash] = useState({'Sun Dec 14 2025': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
+  // const [datesHash, setDatesHash] = useState({'Sun Dec 14 2025': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
   // const colors = ["red", "green", "#848400", "blue"]
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
   
@@ -66,6 +67,8 @@ const App = () => {
     // console.log("handle date str: ", arg.date.toISOString().replace(/T.*$/, ''))
     // arg.date.toDateString()
 
+    // todo: if closed, data from that cell still persists
+
     const isExisting = arg.dayEl.children[0].children[1].children[0].children.length > 0
 
     if (isExisting) {
@@ -77,8 +80,14 @@ const App = () => {
         testData[1].innerText.split('\n'), 
         testData[2].innerText.split('\n')
       ])
+      
+
+      setManageId(arg.dayEl.children[0].children[1].children[0].firstChild.firstChild.attributes.itemID.value)
+    }  else {
+      setDateData([[],[],[]])
     }
 
+    // setManageId(arg.dayEl.id)
     setJobDate(arg.date.toISOString().replace(/T.*$/, '')) // date string:  2025-12-15
     setManageDate(arg.date.toDateString()) //  date str:  Wed Dec 10 2025
     setShowDateModal(true)
@@ -96,19 +105,10 @@ const App = () => {
   }
 
 
-  const handleDateSubmit = (assignments) => {
-    // console.log(dateData)
-
-    setDatesHash(prev => ({
-      ...prev, 
-      [manageDate]: {
-        id: String(eventGuid),
-        title: 'nTimed evet',
-        start: jobDate + 'T12:00:00',
-        jobs: assignments[0],
-        assignees: assignments[1]
-      }
-    }));
+  const handleDateSubmit = (jobs, assignments1, assignments2) => {
+    // clear the existing date assignments
+    const updatedItems = jobsData.filter(item => item.id !== manageId);
+    setJobsData(updatedItems)
 
     setJobsData(prev => ([
       ...prev,
@@ -116,44 +116,44 @@ const App = () => {
         id: String(eventGuid++),
         title: 'nTimed evet',
         start: jobDate + 'T12:00:00',
-        jobs: assignments[0],
-        assignees: assignments[1]
+        jobs: jobs,
+        assignees: assignments1,
+        assignees2: assignments2
       }
     ]))
     
     setDateData([[],[],[]]);
     setManageDate(null)
+
   }
 
 
   const customRender = (args) => {
     // let val = args.event._instance.range.start
     const data = args.event.extendedProps
-    // console.log("cus: ", data)
+    // console.log("cus: ", args)
 
-    if (data === undefined) { return (<></>) }    
+    if (data === undefined) { return (<></>) }
+
+    const newCol = (items, type) => {
+      return (
+        <div className="col">
+          {items.map((item, index) => (
+            <div key={type + index} className="row">
+              <div className="col">
+                {item}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
 
     return (
-      <div className="row" style={{'height': '18px'}}>
-        <div className="col">
-          {data.jobs.map((job) => (
-            <div key={"j-"+job} className="row">
-              <div className="col">
-                {job}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="col">
-          {data.assignees.map((assignee, index) => (
-            <div key={"e-"+index} className="row">
-              <div className="col">
-                {assignee}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="col"></div>
+      <div className="row" itemID={args.event._def.publicId} style={{'height': '18px'}}>
+          { newCol (data.jobs, "jo-") }
+          { newCol (data.assignees, "a1-") }
+          { newCol (data.assignees2, "a2-") }
       </div>
     )
   }
@@ -203,9 +203,7 @@ const App = () => {
           // select={handleMultipleDates}
           // eventsSet={datesHash} // called after initialized/added/changed/removed
           // dayHeaderContent={(arg) => <span>{arg.text.toUpperCase()}</span>}
-          eventContent={(arg) => (
-            customRender(arg)
-          )}
+          eventContent={(arg) => (customRender(arg))}
           events={jobsData} 
           //events={datesHash}
         />
@@ -293,5 +291,18 @@ export default App;
     //     'jobs': [],
     //     'assignees': data,
     //     'assignees2': []
+    //   }
+    // }));
+
+
+        // setDatesHash(prev => ({
+    //   ...prev, 
+    //   [manageDate]: {
+    //     id: String(eventGuid),
+    //     title: 'nTimed evet',
+    //     start: jobDate + 'T12:00:00',
+    //     jobs: jobs,
+    //     assignees: assignments1,
+    //     assignees2: assignments2
     //   }
     // }));

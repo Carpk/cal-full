@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Modal, Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
@@ -7,23 +7,23 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 export default function DateModal({ show, date, jobsList, assignmentsList1, assignmentsList2, handleClose, onDateSubmit}) {
-  const [jobs, setJobs] = useState(jobsList);
-  const [assignments1, setAssignments1] = useState(assignmentsList1);
-  const [assignments2, setAssignments2] = useState(assignmentsList2);
+  const [jobs, setJobs] = useState([]);
+  const [assignments1, setAssignments1] = useState([]);
+  const [assignments2, setAssignments2] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [colOne, setColOne] = useState(true)
-  const [colVal, setColVal] = useState(1)
 
-  // setAssignments(dateData)
-  // console.log(assignments)
-
+  useEffect(() => {
+    setJobs(jobsList)
+    setAssignments1(assignmentsList1)
+    setAssignments2(assignmentsList2)
+  }, [jobsList, assignmentsList1, assignmentsList2])
 
 
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       colOne ? setAssignments1([...assignments1, inputValue]) : setAssignments2([...assignments2, inputValue])
-      // setAssignments([...assignments, inputValue])
       setInputValue('')
     }
   };
@@ -31,6 +31,10 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
   const handleSubmit = () => {
     onDateSubmit(jobs,assignments1, assignments2);
     // setAssignments([[],[],[]]);
+    setColOne(true)
+    setJobs([])
+    setAssignments1([])
+    setAssignments2([])
     handleClose();
   };
 
@@ -82,7 +86,6 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
                 checked={colOne}
                 id={`radio-1`}
                 onChange={handleOptionChange}
-                defaultChecked
               />
               <Form.Check
                 label="2"
