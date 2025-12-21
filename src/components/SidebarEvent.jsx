@@ -6,10 +6,11 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
 
-export default function SidebarJob({ job }) {
+export default function SidebarJob({ job, assignDates }) {
   // console.log("event id: " + job.id )
   const [employees, setEmployees] = useState([])
   const [inputValue, setInputValue] = useState('');
+  const [lock, setLock] = useState("locked")
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -19,27 +20,27 @@ export default function SidebarJob({ job }) {
       setInputValue('')
     }
   };
+
+  const toggleLock = () => {
+    if (lock === "locked") {
+      setLock("unlocked")
+    } else {
+      setLock("locked")
+    }
+
+    assignDates()
+  }
   
   return (
       <Card key={ job.id } className='mb-5' >
         <Card.Body>
-          <Card.Title style={{ color: job.color }}>{job.title}</Card.Title>
+          <Card.Title style={{ color: job.color }}>
+            {job.title}
+            <button onClick={toggleLock}>{lock}</button>
+          </Card.Title>
             { job.assignees.map((name, index) => (
               <ListGroup.Item key={index}>{name}</ListGroup.Item>
             ))}
-            <InputGroup size="sm" className="mb-3">
-              {/* <InputGroup.Text id="inputGroup-sizing-sm">Small</InputGroup.Text> */}
-              {/* <Form.Control
-                aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm"
-                size="sm"
-                type="text"
-                value={inputValue}
-                // onSubmit={(e) => console.log(e)}
-                onKeyDown={handleKeyDown}
-                onChange={(e) => setInputValue(e.target.value)}
-              /> */}
-            </InputGroup>
 
         </Card.Body>
       </Card>

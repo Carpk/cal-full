@@ -26,10 +26,12 @@ const App = () => {
   
   const [showJobModal, setShowJobModal] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
+  const [assignJobDates, setAssignJobDates] = useState(false);
 
   const [jobDate, setJobDate] = useState()
+  const [jobTitle, setJobTitle] = useState()
   const [manageDate, setManageDate] = useState()
-  const [manageId, setManageId] = useState()
+  const [manageCellId, setManageCellId] = useState()
 
   const [jobsData, setJobsData] = useState([]);
   const [dateData, setDateData] = useState([[],[],[]]);
@@ -61,40 +63,61 @@ const App = () => {
     setShowDateModal(!showDateModal);
   };
 
+  const toggleAssignJobDates = () => {
+    console.log("toggleAssignJobDates")
+    setAssignJobDates(!assignJobDates);
+  };
 
 
-  const handleSingleDateClick = (arg) => {
-    // console.log("handle date str: ", arg.date.toISOString().replace(/T.*$/, ''))
-    // arg.date.toDateString()
 
-    // todo: if closed, data from that cell still persists
+  const handleDateClick = (arg) => {
+    const cellNodes = arg.dayEl.children[0].children[1].children[0].children
+    setJobDate(arg.date.toISOString().replace(/T.*$/, ''))
 
-    const isExisting = arg.dayEl.children[0].children[1].children[0].children.length > 0
-
-    if (isExisting) {
-      const testData = arg.dayEl.children[0].children[1].children[0].children[0].children[0].children
-      // setDateData(arg.dayEl.children[0].children[1].children[0].children[0].children[0].children)
-      // console.log(testData)
+    // check for existing cell nodes, if exists, prepare contents for Modal
+    if (cellNodes.length > 0) {
+      setManageCellId(cellNodes[0].children[0].attributes.itemID.value)
+      const textNodes = cellNodes[0].children[0].children
       setDateData([
-        testData[0].innerText.split('\n'), 
-        testData[1].innerText.split('\n'), 
-        testData[2].innerText.split('\n')
+        textNodes[0].innerText.split('\n'), 
+        textNodes[1].innerText.split('\n'), 
+        textNodes[2].innerText.split('\n')
       ])
-      
 
-      setManageId(arg.dayEl.children[0].children[1].children[0].firstChild.firstChild.attributes.itemID.value)
     }  else {
+      // console.log("cell nodes: ", cellNodes)
+      setManageCellId(null)
       setDateData([[],[],[]])
     }
 
-    // setManageId(arg.dayEl.id)
-    setJobDate(arg.date.toISOString().replace(/T.*$/, '')) // date string:  2025-12-15
-    setManageDate(arg.date.toDateString()) //  date str:  Wed Dec 10 2025
-    setShowDateModal(true)
+    if (assignJobDates) { 
+      const updatedItems = jobsData.filter(item => item.id !== manageCellId);
+      setJobsData(updatedItems)
+
+      setJobsData(prev => ([
+        ...prev,
+        {
+          id: String(eventGuid++),
+          title: 'nTimed evet',
+          start: jobDate + 'T12:00:00',
+          jobs: [...dateData[0], "MSI"],
+          assignees: [...dateData[1]],
+          assignees2: [...dateData[2]]
+        }
+      ]))
+
+      setDateData([[],[],[]]);
+    } else {
+
+      setManageDate(arg.date.toDateString()) //  date str:  Wed Dec 10 2025, displays in modal
+      setShowDateModal(true)
+    }
   }
 
 
   const handleJobSubmit = (data) => {
+    console.log(data)
+
     eventGuid = eventGuid + 1
     console.log(eventGuid)
 
@@ -107,7 +130,7 @@ const App = () => {
 
   const handleDateSubmit = (jobs, assignments1, assignments2) => {
     // clear the existing date assignments
-    const updatedItems = jobsData.filter(item => item.id !== manageId);
+    const updatedItems = jobsData.filter(item => item.id !== manageCellId);
     setJobsData(updatedItems)
 
     setJobsData(prev => ([
@@ -186,7 +209,7 @@ const App = () => {
           <div className="row">
             { currentJobs.map((job) => (
               <div key={job.id} className="col">
-                <SidebarJob job={job} />
+                <SidebarJob job={job} assignDates={toggleAssignJobDates} />
               </div>
             ))}
           </div>
@@ -198,19 +221,15 @@ const App = () => {
           initialView="dayGridMonth"
           editable={true}
           selectable={true}
-          // initialEvents={INITIAL_EVENTS}
-          dateClick={handleSingleDateClick}
-          // select={handleMultipleDates}
-          // eventsSet={datesHash} // called after initialized/added/changed/removed
-          // dayHeaderContent={(arg) => <span>{arg.text.toUpperCase()}</span>}
+          dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
-          events={jobsData} 
-          //events={datesHash}
+          events={jobsData}
         />
       </div>
 
       <JobModal 
         show={showJobModal} 
+        // setJobTitle={setJobTitle}
         handleClose={toggleJobsModal}
         returnData={handleJobSubmit}
       />
@@ -231,6 +250,20 @@ export default App;
 
 
 
+        // <FullCalendar
+        //   plugins={[ dayGridPlugin, interactionPlugin ]}
+        //   initialView="dayGridMonth"
+        //   editable={true}
+        //   selectable={true}
+        //   // initialEvents={INITIAL_EVENTS}
+        //   dateClick={handleSingleDateClick}
+        //   // select={handleMultipleDates}
+        //   // eventsSet={datesHash} // called after initialized/added/changed/removed
+        //   // dayHeaderContent={(arg) => <span>{arg.text.toUpperCase()}</span>}
+        //   eventContent={(arg) => (customRender(arg))}
+        //   events={jobsData} 
+        //   //events={datesHash}
+        // />
 
   // CODE FOR USING QUERY SELECTORS
   // const handleJobData = (data) => {
@@ -306,3 +339,7 @@ export default App;
     //     assignees2: assignments2
     //   }
     // }));
+
+
+    // console.log("handle date str: ", arg.date.toISOString().replace(/T.*$/, ''))
+    // arg.date.toDateString()

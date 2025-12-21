@@ -80,7 +80,7 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
           <div className="row mb-5">
             <div className="col">
               <Form.Check
-                label="1"
+                label="Column 1"
                 name="group1"
                 type='radio'
                 checked={colOne}
@@ -88,7 +88,7 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
                 onChange={handleOptionChange}
               />
               <Form.Check
-                label="2"
+                label="Column 2"
                 name="group1"
                 type='radio'
                 checked={!colOne}
