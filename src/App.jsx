@@ -29,15 +29,12 @@ const App = () => {
   const [assignJobDates, setAssignJobDates] = useState(false);
 
   const [jobDate, setJobDate] = useState()
-  const [jobTitle, setJobTitle] = useState()
-  const [manageDate, setManageDate] = useState()
   const [manageCellId, setManageCellId] = useState()
 
   const [jobsData, setJobsData] = useState([]);
-  const [dateData, setDateData] = useState([[],[],[]]);
+  const [dateData , setDateData] = useState([[],[],[]]);
   const [currentJobs, setCurrentJobs] = useState([]);
-  // const [datesHash, setDatesHash] = useState({'Sun Dec 14 2025': {'jobs': ['msi', 'msu'], 'assignees': ['jim', 'bob', 'joe','bert','larry'], 'assignees2': []}})
-  // const colors = ["red", "green", "#848400", "blue"]
+
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
   
 
@@ -72,7 +69,9 @@ const App = () => {
 
   const handleDateClick = (arg) => {
     const cellNodes = arg.dayEl.children[0].children[1].children[0].children
+    const startDate = arg.date.toISOString().replace(/T.*$/, '')
     setJobDate(arg.date.toISOString().replace(/T.*$/, ''))
+    // arg.date.toDateString() // for modal display
 
     // check for existing cell nodes, if exists, prepare contents for Modal
     if (cellNodes.length > 0) {
@@ -90,7 +89,8 @@ const App = () => {
       setDateData([[],[],[]])
     }
 
-    if (assignJobDates) { 
+    if (assignJobDates) {
+      // TODO: jobdate is a click behind
       const updatedItems = jobsData.filter(item => item.id !== manageCellId);
       setJobsData(updatedItems)
 
@@ -99,7 +99,7 @@ const App = () => {
         {
           id: String(eventGuid++),
           title: 'nTimed evet',
-          start: jobDate + 'T12:00:00',
+          start: startDate + 'T12:00:00',
           jobs: [...dateData[0], "MSI"],
           assignees: [...dateData[1]],
           assignees2: [...dateData[2]]
@@ -109,7 +109,6 @@ const App = () => {
       setDateData([[],[],[]]);
     } else {
 
-      setManageDate(arg.date.toDateString()) //  date str:  Wed Dec 10 2025, displays in modal
       setShowDateModal(true)
     }
   }
@@ -146,8 +145,6 @@ const App = () => {
     ]))
     
     setDateData([[],[],[]]);
-    setManageDate(null)
-
   }
 
 
@@ -235,7 +232,7 @@ const App = () => {
       />
       <DateModal 
         show={showDateModal}
-        date={manageDate}
+        date={jobDate}
         jobsList={dateData[0]}
         assignmentsList1={dateData[1]}
         assignmentsList2={dateData[2]}
