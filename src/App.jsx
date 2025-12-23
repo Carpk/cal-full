@@ -72,22 +72,31 @@ const App = () => {
     const startDate = arg.date.toISOString().replace(/T.*$/, '')
     setJobDate(arg.date.toISOString().replace(/T.*$/, ''))
     // arg.date.toDateString() // for modal display
+    setManageCellId(null)
+    let job = []
+    let as1 = []
+    let as2 = []
+
 
     // check for existing cell nodes, if exists, prepare contents for Modal
     if (cellNodes.length > 0) {
       setManageCellId(cellNodes[0].children[0].attributes.itemID.value)
       const textNodes = cellNodes[0].children[0].children
-      setDateData([
-        textNodes[0].innerText.split('\n'), 
-        textNodes[1].innerText.split('\n'), 
-        textNodes[2].innerText.split('\n')
-      ])
+      // setDateData([
+      //   textNodes[0].innerText.split('\n'), 
+      //   textNodes[1].innerText.split('\n'), 
+      //   textNodes[2].innerText.split('\n')
+      // ])
+        job = textNodes[0].innerText.split('\n') 
+        as1 = textNodes[1].innerText.split('\n') 
+        as2 = textNodes[2].innerText.split('\n')
 
-    }  else {
-      // console.log("cell nodes: ", cellNodes)
-      setManageCellId(null)
-      setDateData([[],[],[]])
-    }
+    } 
+    //  else {
+    //   // console.log("cell nodes: ", cellNodes)
+    //   setManageCellId(null)
+    //   setDateData([[],[],[]])
+    // }
 
     if (assignJobDates) {
       // TODO: jobdate is a click behind
@@ -100,15 +109,15 @@ const App = () => {
           id: String(eventGuid++),
           title: 'nTimed evet',
           start: startDate + 'T12:00:00',
-          jobs: [...dateData[0], "MSI"],
-          assignees: [...dateData[1]],
-          assignees2: [...dateData[2]]
+          jobs: [...job, "MSI"],
+          assignees: [...as1],
+          assignees2: [...as2]
         }
       ]))
 
-      setDateData([[],[],[]]);
+      // setDateData([[],[],[]]);
     } else {
-
+      setDateData([job,as1,as2])
       setShowDateModal(true)
     }
   }
