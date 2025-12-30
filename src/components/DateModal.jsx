@@ -22,7 +22,9 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
 
 
   const handleKeyDown = (e) => {
+    
     if (e.key === 'Enter') {
+      e.preventDefault();
       colOne ? setAssignments1([...assignments1, inputValue]) : setAssignments2([...assignments2, inputValue])
       setInputValue('')
     }
@@ -107,9 +109,6 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
                 onChange={(e) => setInputValue(e.target.value)}
                 autoFocus
               />
-              <Form.Group className="mb-3" controlId="formJobName">
-                <Form.Control type="text"  placeholder='not here'/>
-              </Form.Group>
             </div>
             <div className="col"></div>
           </div>

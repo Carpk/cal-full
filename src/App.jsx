@@ -70,38 +70,28 @@ const App = () => {
   const handleDateClick = (arg) => {
     const cellNodes = arg.dayEl.children[0].children[1].children[0].children
     const startDate = arg.date.toISOString().replace(/T.*$/, '')
-    setJobDate(arg.date.toISOString().replace(/T.*$/, ''))
-    // arg.date.toDateString() // for modal display
+    let cellId = null;
+
     setManageCellId(null)
     let job = []
     let as1 = []
     let as2 = []
 
-
     // check for existing cell nodes, if exists, prepare contents for Modal
     if (cellNodes.length > 0) {
       setManageCellId(cellNodes[0].children[0].attributes.itemID.value)
+      cellId = cellNodes[0].children[0].attributes.itemID.value
       const textNodes = cellNodes[0].children[0].children
-      // setDateData([
-      //   textNodes[0].innerText.split('\n'), 
-      //   textNodes[1].innerText.split('\n'), 
-      //   textNodes[2].innerText.split('\n')
-      // ])
-        job = textNodes[0].innerText.split('\n') 
-        as1 = textNodes[1].innerText.split('\n') 
-        as2 = textNodes[2].innerText.split('\n')
-
+      job = textNodes[0].innerText.split('\n') 
+      as1 = textNodes[1].innerText.split('\n') 
+      as2 = textNodes[2].innerText.split('\n')
     } 
-    //  else {
-    //   // console.log("cell nodes: ", cellNodes)
-    //   setManageCellId(null)
-    //   setDateData([[],[],[]])
-    // }
 
     if (assignJobDates) {
-      // TODO: jobdate is a click behind
-      const updatedItems = jobsData.filter(item => item.id !== manageCellId);
+      if (cellId !== null) {
+      const updatedItems = jobsData.filter(item => item.id !== cellId);
       setJobsData(updatedItems)
+      }
 
       setJobsData(prev => ([
         ...prev,
@@ -110,13 +100,13 @@ const App = () => {
           title: 'nTimed evet',
           start: startDate + 'T12:00:00',
           jobs: [...job, "MSI"],
-          assignees: [...as1],
-          assignees2: [...as2]
+          assignees: as1,
+          assignees2: as2
         }
       ]))
 
-      // setDateData([[],[],[]]);
     } else {
+      setJobDate(startDate)
       setDateData([job,as1,as2])
       setShowDateModal(true)
     }
@@ -131,7 +121,6 @@ const App = () => {
 
     data.id = eventGuid
     data.color = colors[eventGuid%colors.length]
-    console.log(data)
     setCurrentJobs([...currentJobs, data])
   }
 
@@ -254,7 +243,9 @@ const App = () => {
 
 export default App;
 
-
+    // DATE FORMATTING
+    // setJobDate(arg.date.toISOString().replace(/T.*$/, ''))
+    // arg.date.toDateString() // for modal display
 
         // <FullCalendar
         //   plugins={[ dayGridPlugin, interactionPlugin ]}

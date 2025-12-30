@@ -36,7 +36,7 @@ export default function JobModal({ show, handleClose, returnData}) {
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3" controlId="formJobName">
-            <Form.Control type="text" ref={jobName} placeholder='Job Name'/>
+            <Form.Control type="text" ref={jobName} placeholder='Job Name' autoFocus/>
           </Form.Group>
 
           { assignees.map((name, index) => (
