@@ -29,6 +29,7 @@ const App = () => {
   const [assignJobDates, setAssignJobDates] = useState(false);
 
   const [jobDate, setJobDate] = useState()
+  const [jobName, setJobName] = useState()
   const [manageCellId, setManageCellId] = useState()
 
   const [jobsData, setJobsData] = useState([]);
@@ -70,7 +71,8 @@ const App = () => {
   const handleDateClick = (arg) => {
     const cellNodes = arg.dayEl.children[0].children[1].children[0].children
     const startDate = arg.date.toISOString().replace(/T.*$/, '')
-    let cellId = null;
+    const cellsExists = cellNodes.length > 0
+    const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
     setManageCellId(null)
     let job = []
@@ -78,9 +80,8 @@ const App = () => {
     let as2 = []
 
     // check for existing cell nodes, if exists, prepare contents for Modal
-    if (cellNodes.length > 0) {
-      setManageCellId(cellNodes[0].children[0].attributes.itemID.value)
-      cellId = cellNodes[0].children[0].attributes.itemID.value
+    if (cellsExists) {
+      setManageCellId(cellId)
       const textNodes = cellNodes[0].children[0].children
       job = textNodes[0].innerText.split('\n') 
       as1 = textNodes[1].innerText.split('\n') 
@@ -89,8 +90,8 @@ const App = () => {
 
     if (assignJobDates) {
       if (cellId !== null) {
-      const updatedItems = jobsData.filter(item => item.id !== cellId);
-      setJobsData(updatedItems)
+        const updatedItems = jobsData.filter(item => item.id !== cellId);
+        setJobsData(updatedItems)
       }
 
       setJobsData(prev => ([
@@ -99,7 +100,7 @@ const App = () => {
           id: String(eventGuid++),
           title: 'nTimed evet',
           start: startDate + 'T12:00:00',
-          jobs: [...job, "MSI"],
+          jobs: [...job, jobName],
           assignees: as1,
           assignees2: as2
         }
@@ -145,11 +146,27 @@ const App = () => {
     setDateData([[],[],[]]);
   }
 
+  const handleMultipleDates = (selectInfo) => {
+    // TODO: open jobs modal
+    multipleDatesModalReturn(selectInfo)
+  }
+
+  const multipleDatesModalReturn = (data) => {
+    let currentDate = data.start;
+    const dates = [];
+
+    while (currentDate <= data.end) {
+      // Push a *copy* of the current date to the array
+      dates.push(new Date(currentDate)); 
+      // Increment the date by one day
+      currentDate.setDate(currentDate.getDate() + 1); 
+    }
+    console.log(data)
+  }
+
 
   const customRender = (args) => {
-    // let val = args.event._instance.range.start
     const data = args.event.extendedProps
-    // console.log("cus: ", args)
 
     if (data === undefined) { return (<></>) }
 
@@ -191,7 +208,7 @@ const App = () => {
               <h2>Jobs ({currentJobs.length})</h2>
             </div>
             <div className="col">
-              <button className='btn-link' style={{'float': 'right', 'marginTop': '4px'}} onClick={toggleJobsModal} type="button">
+              <button className='btn-link flt-right' style={{'marginTop': '4px'}} onClick={toggleJobsModal} type="button">
                 <img src={plusSquare} 
                   alt="add a new job"
                   style={{'marginTop': '3px'}}
@@ -204,7 +221,11 @@ const App = () => {
           <div className="row">
             { currentJobs.map((job) => (
               <div key={job.id} className="col">
-                <SidebarJob job={job} assignDates={toggleAssignJobDates} />
+                <SidebarJob 
+                  job={job} 
+                  assignDates={toggleAssignJobDates} 
+                  setJobName={setJobName}  
+                />
               </div>
             ))}
           </div>
@@ -216,6 +237,7 @@ const App = () => {
           initialView="dayGridMonth"
           editable={true}
           selectable={true}
+          select={handleMultipleDates}
           dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
           events={jobsData}
