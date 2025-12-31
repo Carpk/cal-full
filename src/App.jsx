@@ -30,7 +30,7 @@ const App = () => {
 
   const [jobDate, setJobDate] = useState()
   const [jobName, setJobName] = useState()
-  const [manageCellId, setManageCellId] = useState()
+  // const [existingCellId, setExistingCellId] = useState()
 
   const [jobsData, setJobsData] = useState([]);
   const [dateData , setDateData] = useState([[],[],[]]);
@@ -62,7 +62,6 @@ const App = () => {
   };
 
   const toggleAssignJobDates = () => {
-    console.log("toggleAssignJobDates")
     setAssignJobDates(!assignJobDates);
   };
 
@@ -74,14 +73,14 @@ const App = () => {
     const cellsExists = cellNodes.length > 0
     const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
-    setManageCellId(null)
+    // setExistingCellId(null)
     let job = []
     let as1 = []
     let as2 = []
 
     // check for existing cell nodes, if exists, prepare contents for Modal
     if (cellsExists) {
-      setManageCellId(cellId)
+      // setExistingCellId(cellId)
       const textNodes = cellNodes[0].children[0].children
       job = textNodes[0].innerText.split('\n') 
       as1 = textNodes[1].innerText.split('\n') 
@@ -89,6 +88,7 @@ const App = () => {
     } 
 
     if (assignJobDates) {
+      // assigning job name to a date
       if (cellId !== null) {
         const updatedItems = jobsData.filter(item => item.id !== cellId);
         setJobsData(updatedItems)
@@ -100,6 +100,7 @@ const App = () => {
           id: String(eventGuid++),
           title: 'nTimed evet',
           start: startDate + 'T12:00:00',
+          // end: startDate,
           jobs: [...job, jobName],
           assignees: as1,
           assignees2: as2
@@ -115,10 +116,7 @@ const App = () => {
 
 
   const handleJobSubmit = (data) => {
-    console.log(data)
-
     eventGuid = eventGuid + 1
-    console.log(eventGuid)
 
     data.id = eventGuid
     data.color = colors[eventGuid%colors.length]
@@ -128,20 +126,22 @@ const App = () => {
 
   const handleDateSubmit = (jobs, assignments1, assignments2) => {
     // clear the existing date assignments
-    const updatedItems = jobsData.filter(item => item.id !== manageCellId);
-    setJobsData(updatedItems)
+    // const filteredItems = jobsData.filter(item => item.id !== existingCellId); // maybe use job date instead of ID
+    const filteredItems = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
+    // setJobsData(filteredItems)
 
-    setJobsData(prev => ([
-      ...prev,
+    setJobsData([
+      ...filteredItems,
       {
         id: String(eventGuid++),
         title: 'nTimed evet',
-        start: jobDate + 'T12:00:00',
+        start: jobDate + 'T12:00:00', // arg.date.toISOString().replace(/T.*$/, '')
+        // end: jobDate,
         jobs: jobs,
         assignees: assignments1,
         assignees2: assignments2
       }
-    ]))
+    ])
     
     setDateData([[],[],[]]);
   }
@@ -156,9 +156,15 @@ const App = () => {
     const dates = [];
 
     while (currentDate <= data.end) {
-      // Push a *copy* of the current date to the array
-      dates.push(new Date(currentDate)); 
-      // Increment the date by one day
+      dates.push(new Date(currentDate));
+      // start: arg.date.toISOString().replace(/T.*$/, '')
+
+
+
+
+
+
+      
       currentDate.setDate(currentDate.getDate() + 1); 
     }
     console.log(data)
