@@ -62,17 +62,20 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
         <Form>
           
           <div className="row mb-5">
-            <div className="col">
+            
+            <div className="col" >
               { jobs.map((name, index) => (
                 <ListGroup.Item key={index}>{name}</ListGroup.Item>
               ))}
             </div>
-            <div className="col">
+            {/* style={{ box-shadow: colOne ? '0px 4px 8px blue': ''}} */}
+            <div className="col nb-height" style={{ 'box-shadow': colOne ? '0px 4px 8px blue': ''}}>
               { assignments1.map((name, index) => (
                 <ListGroup.Item key={index}>{name}</ListGroup.Item>
               ))}
             </div>
-            <div className="col">
+            {/* style={{ box-shadow: !colOne ? '0px 4px 8px blue': ''}} */}
+            <div className="col nb-height" style={{ 'box-shadow': !colOne ? '0px 4px 8px blue': ''}}>
               { assignments2.map((name, index) => (
                 <ListGroup.Item key={index}>{name}</ListGroup.Item>
               ))}
@@ -140,3 +143,8 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
           //     ))}
           //   </div>
           // </div>
+
+
+
+          // box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+          // box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
