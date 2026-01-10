@@ -11,7 +11,7 @@ import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from "@fullcalendar/interaction"
 
-// import { INITIAL_EVENTS, createEventId } from './event-utils'
+import { INITIAL_EVENTS } from './event-utils'
 import SidebarJob from './components/SidebarEvent'
 import JobModal from "./components/JobModal";
 import DateModal from "./components/DateModal";
@@ -33,7 +33,7 @@ const App = () => {
 
   const [jobsData, setJobsData] = useState([]);
   const [dateData , setDateData] = useState([[],[],[]]);
-  const [currentJobs, setCurrentJobs] = useState([]);
+  const [jobsListing, setJobsListing] = useState([]);
 
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
   
@@ -78,11 +78,13 @@ const App = () => {
 
     // check for existing cell nodes, if exists, prepare contents for Modal
     if (cellsExists) {
-      const textNodes = cellNodes[0].children[0].children
+      const textNodes = cellNodes[0].children[0].children 
 
-      job = textNodes[0].innerText.split('\n') 
+      job = textNodes[0].innerText.split('\n') // TODO: instead, get data from jobsData
       as1 = textNodes[1].innerText.split('\n') 
       as2 = textNodes[2].innerText.split('\n')
+
+      const existingJob = jobsData.find(u => u.id === cellId);
     } 
 
     if (assignJobDates) {
@@ -99,6 +101,7 @@ const App = () => {
           title: 'nTimed evet',
           start: startDate + 'T12:00:00',
           // end: startDate,
+          data: [[...job, jobName], as1, as2],
           jobs: [...job, jobName],
           assignees: as1,
           assignees2: as2
@@ -118,7 +121,7 @@ const App = () => {
 
     data.id = eventGuid
     data.color = colors[eventGuid%colors.length]
-    setCurrentJobs([...currentJobs, data])
+    setJobsListing([...jobsListing, data])
   }
 
 
@@ -131,7 +134,8 @@ const App = () => {
       {
         id: String(eventGuid++),
         title: 'nTimed evet',
-        start: jobDate + 'T12:00:00', 
+        start: jobDate + 'T12:00:00',
+        data: [jobs, assignments1, assignments2],
         jobs: jobs,
         assignees: assignments1,
         assignees2: assignments2
@@ -176,7 +180,8 @@ const App = () => {
         {
           id: String(eventGuid++),
           title: 'nTimed evet',
-          start: currentDate + 'T12:00:00', 
+          start: currentDate + 'T12:00:00',
+          data: [jobs, as1, as2],
           jobs: jobs,
           assignees: as1,
           assignees2: as2
@@ -195,8 +200,7 @@ const App = () => {
 
   const customRender = (args) => {
     const data = args.event.extendedProps
-
-    if (data === undefined) { return (<></>) }
+    console.log(data)
 
     const newCol = (items, type) => {
       return (
@@ -212,12 +216,17 @@ const App = () => {
       )
     }
 
+    if (data === undefined) { return (<></>) }
+    
     return (
       <div className="row" itemID={args.event._def.publicId} style={{'height': '18px'}}>
-          { newCol (data.jobs, "jo-") }
+          { data.data.map((job, index) => (
+            newCol (job, "c"+index+"-")
+          ))}
+          {/* { newCol (data.jobs, "jo-") }
           { newCol (data.assignees, "a1-") }
           { newCol (data.assignees2, "a2-") }
-          { newCol (data.assignees2, "a2-") }
+          { newCol (data.assignees2, "a2-") } */}
       </div>
     )
   }
@@ -234,7 +243,7 @@ const App = () => {
         <div className='app-sidebar-section'>
           <div className="row">
             <div className="col">
-              <h2>Jobs ({currentJobs.length})</h2>
+              <h2>Jobs ({jobsListing.length})</h2>
             </div>
             <div className="col">
               <button className='btn-link flt-right' style={{'marginTop': '4px'}} onClick={toggleJobsModal} type="button">
@@ -248,7 +257,7 @@ const App = () => {
             </div>
           </div>
           <div className="row">
-            { currentJobs.map((job) => (
+            { jobsListing.map((job) => (
               <div key={job.id} className="col">
                 <SidebarJob 
                   job={job} 
@@ -266,6 +275,7 @@ const App = () => {
           initialView="dayGridMonth"
           editable={true}
           selectable={true}
+          initialEvents={INITIAL_EVENTS}
           select={handleMultipleDates}
           dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
