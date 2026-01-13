@@ -32,7 +32,7 @@ const App = () => {
   const [jobName, setJobName] = useState()
 
   const [jobsData, setJobsData] = useState([]);
-  const [dateData , setDateData] = useState([[],[],[]]);
+  const [modalData , setModalData] = useState([[],[],[]]);
   const [jobsListing, setJobsListing] = useState([]);
 
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
@@ -77,15 +77,28 @@ const App = () => {
     let as2 = []
 
     // check for existing cell nodes, if exists, prepare contents for Modal
+
+    const existingJob = cellsExists ? jobsData.find(u => u.id === cellId) : null;
+
     if (cellsExists) {
+      // TODO: instead, get data from jobsData
+      // const existingJob = jobsData.find(u => u.id === cellId);
+
+      // const foundData = jobsData.find((item) => {
+      //   if (item.start === startDate + 'T12:00:00') {
+      //     job = item.jobs
+      //     as1 = item.assignees
+      //     as2 = item.assignees2
+      //   }
+      // })
+
       const textNodes = cellNodes[0].children[0].children 
 
-      job = textNodes[0].innerText.split('\n') // TODO: instead, get data from jobsData
+      job = textNodes[0].innerText.split('\n') 
       as1 = textNodes[1].innerText.split('\n') 
       as2 = textNodes[2].innerText.split('\n')
-
-      const existingJob = jobsData.find(u => u.id === cellId);
     } 
+
 
     if (assignJobDates) {
       // assigning job name to a date
@@ -110,7 +123,7 @@ const App = () => {
 
     } else {
       setJobDate(startDate)
-      setDateData([job,as1,as2])
+      setModalData([job,as1,as2])
       setShowDateModal(true)
     }
   }
@@ -125,7 +138,7 @@ const App = () => {
   }
 
 
-  const handleDateSubmit = (jobs, assignments1, assignments2) => {
+  const handleDateSubmit = (data) => {
     // clear the existing date assignments
     const filteredItems = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
 
@@ -135,14 +148,11 @@ const App = () => {
         id: String(eventGuid++),
         title: 'nTimed evet',
         start: jobDate + 'T12:00:00',
-        data: [jobs, assignments1, assignments2],
-        jobs: jobs,
-        assignees: assignments1,
-        assignees2: assignments2
+        data: data,
       }
     ])
     
-    setDateData([[],[],[]]);
+    setModalData([[],[],[]]);
   }
 
   const handleMultipleDates = (selectInfo) => {
@@ -202,11 +212,11 @@ const App = () => {
     const data = args.event.extendedProps
     console.log(data)
 
-    const newCol = (items, type) => {
+    const newCol = (items, pref) => {
       return (
         <div className="col">
           {items.map((item, index) => (
-            <div key={type + index} className="row">
+            <div key={pref + index} className="row">
               <div className="col">
                 {item}
               </div>
@@ -283,6 +293,7 @@ const App = () => {
         />
       </div>
 
+
       <JobModal 
         show={showJobModal} 
         // setJobTitle={setJobTitle}
@@ -292,9 +303,10 @@ const App = () => {
       <DateModal 
         show={showDateModal}
         date={jobDate}
-        jobsList={dateData[0]}
-        assignmentsList1={dateData[1]}
-        assignmentsList2={dateData[2]}
+        data={modalData}
+        jobsList={modalData[0]}
+        assignmentsList1={modalData[1]}
+        assignmentsList2={modalData[2]}
         handleClose={toggleDateModal}
         onDateSubmit={handleDateSubmit}
       />

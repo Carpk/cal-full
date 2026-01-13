@@ -6,18 +6,26 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 
-export default function DateModal({ show, date, jobsList, assignmentsList1, assignmentsList2, handleClose, onDateSubmit}) {
+export default function DateModal({ show, date, data, handleClose, onDateSubmit}) {
   const [jobs, setJobs] = useState([]);
-  const [assignments1, setAssignments1] = useState([]);
-  const [assignments2, setAssignments2] = useState([]);
+  const [jobData, setJobData] = useState();
+  // const [assignments, setAssignments
+  // const [assignments1, setAssignments1] = useState([]);
+  // const [assignments2, setAssignments2] = useState([]);
   const [inputValue, setInputValue] = useState('');
-  const [colOne, setColOne] = useState(true)
+
+
+  const [colOne, setColOne] = useState(true) // user ind instead
+  const [colNum, setColNum] = useState(1)
+
 
   useEffect(() => {
-    setJobs(jobsList)
-    setAssignments1(assignmentsList1)
-    setAssignments2(assignmentsList2)
-  }, [jobsList, assignmentsList1, assignmentsList2])
+    setJobData(data)
+
+    // setJobs(data[0])
+    // setAssignments1(data[1])
+    // setAssignments2(data[2])
+  }, [data])
 
 
 
@@ -25,23 +33,23 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
     
     if (e.key === 'Enter') {
       e.preventDefault();
-      colOne ? setAssignments1([...assignments1, inputValue]) : setAssignments2([...assignments2, inputValue])
+      // colOne ? setAssignments1([...assignments1, inputValue]) : setAssignments2([...assignments2, inputValue])
+      data[colNum].push(inputValue)
       setInputValue('')
     }
   };
 
   const handleSubmit = () => {
-    onDateSubmit(jobs,assignments1, assignments2);
+    onDateSubmit(data);
     // setAssignments([[],[],[]]);
     setColOne(true)
-    setJobs([])
-    setAssignments1([])
-    setAssignments2([])
+
     handleClose();
   };
 
-  const handleOptionChange = () => {
+  const handleOptionChange = (val) => {
     setColOne(!colOne)
+    setColNum(val)
   }
 
   const addEle = (index) => {
@@ -60,29 +68,22 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
       </Modal.Header>
       <Modal.Body>
         <Form>
-          
           <div className="row mb-5">
-            
-            <div className="col" >
-              { jobs.map((name, index) => (
-                <ListGroup.Item key={index}>{name}</ListGroup.Item>
-              ))}
-            </div>
-            {/* style={{ box-shadow: colOne ? '0px 4px 8px blue': ''}} */}
-            <div className="col nb-height" style={{ 'box-shadow': colOne ? '0px 4px 8px blue': ''}}>
-              { assignments1.map((name, index) => (
-                <ListGroup.Item key={index}>{name}</ListGroup.Item>
-              ))}
-            </div>
-            {/* style={{ box-shadow: !colOne ? '0px 4px 8px blue': ''}} */}
-            <div className="col nb-height" style={{ 'box-shadow': !colOne ? '0px 4px 8px blue': ''}}>
-              { assignments2.map((name, index) => (
-                <ListGroup.Item key={index}>{name}</ListGroup.Item>
-              ))}
-            </div>
+            { data.map((section, index) => (
+              <div 
+                className="col" 
+                style={{ 'boxShadow': colNum === index ? '0px 4px 8px black': ''}}
+                onClick={() => handleOptionChange(index)}
+              >
+                { section.map((name, index) => (
+                  <ListGroup.Item key={index}>{name}</ListGroup.Item>
+                ))}
+              </div>
+            ))}
           </div>
           
           <div className="row mb-5">
+            
             <div className="col">
               <Form.Check
                 label="Column 1"
@@ -90,7 +91,7 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
                 type='radio'
                 checked={colOne}
                 id={`radio-1`}
-                onChange={handleOptionChange}
+                onChange={() => handleOptionChange(1)}
               />
               <Form.Check
                 label="Column 2"
@@ -98,7 +99,7 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
                 type='radio'
                 checked={!colOne}
                 id={`radio-2`}
-                onChange={handleOptionChange}
+                onChange={() => handleOptionChange(2)}
               />
             </div>
             <div className="col">
@@ -129,6 +130,34 @@ export default function DateModal({ show, date, jobsList, assignmentsList1, assi
     </Modal>
   )
 }
+
+
+
+            // {/* <div className="col" >
+            //   { jobs.map((name, index) => (
+            //     <ListGroup.Item key={index}>{name}</ListGroup.Item>
+            //   ))}
+            // </div>
+            // <div className="col nb-height" 
+            //   style={{ 'boxShadow': colNum === 1 ? '0px 4px 8px black': ''}}
+            //   onClick={() => handleOptionChange(1)}
+            // >
+            //   { assignments1.map((name, index) => (
+            //     <ListGroup.Item key={index}>{name}</ListGroup.Item>
+            //   ))}
+            // </div>
+            // <div 
+            //   className="col nb-height" 
+            //   style={{ 'boxShadow': colNum === 2 ? '0px 4px 8px black': ''}}
+            //   onClick={() => handleOptionChange(2)}
+            // >
+            //   { assignments2.map((name, index) => (
+            //     <ListGroup.Item key={index}>{name}</ListGroup.Item>
+            //   ))}
+            // </div> */}
+
+
+ //             {/* style={{ box-shadow: !colOne ? '0px 4px 8px blue': ''}} */}
 
 
           // <div className="row mb-5">
