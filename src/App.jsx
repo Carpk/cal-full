@@ -29,7 +29,8 @@ const App = () => {
   const [assignJobDates, setAssignJobDates] = useState(false);
 
   const [jobDate, setJobDate] = useState()
-  const [jobName, setJobName] = useState()
+  const [modalEvent, setModalEvent] = useState()
+
 
   const [jobsData, setJobsData] = useState([]);
   const [modalData , setModalData] = useState([[],[],[]]);
@@ -69,63 +70,74 @@ const App = () => {
   const handleDateClick = (arg) => {
     const cellNodes = arg.dayEl.children[0].children[1].children[0].children
     const startDate = arg.date.toISOString().replace(/T.*$/, '')
+    console.log("startdate", startDate)
     const cellsExists = cellNodes.length > 0
+    console.log("cellNodes", arg.dayEl.children[0].children)
+    console.log("jobsData", jobsData)
+
     const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
-    let job = []
-    let as1 = []
-    let as2 = []
+    // let job = []
+    // let as1 = []
+    // let as2 = []
 
     // check for existing cell nodes, if exists, prepare contents for Modal
-
-    const existingJob = cellsExists ? jobsData.find(u => u.id === cellId) : null;
-
-    if (cellsExists) {
-      // TODO: instead, get data from jobsData
-      // const existingJob = jobsData.find(u => u.id === cellId);
-
-      // const foundData = jobsData.find((item) => {
-      //   if (item.start === startDate + 'T12:00:00') {
-      //     job = item.jobs
-      //     as1 = item.assignees
-      //     as2 = item.assignees2
-      //   }
-      // })
-
-      const textNodes = cellNodes[0].children[0].children 
-
-      job = textNodes[0].innerText.split('\n') 
-      as1 = textNodes[1].innerText.split('\n') 
-      as2 = textNodes[2].innerText.split('\n')
-    } 
-
-
-    if (assignJobDates) {
-      // assigning job name to a date
-      if (cellId !== null) {
-        const updatedItems = jobsData.filter(item => item.id !== cellId);
-        setJobsData(updatedItems)
-      }
-
-      setJobsData(prev => ([
-        ...prev,
-        {
+    const existingEvent = cellsExists ? jobsData.find(u => u.id === cellId) : {
           id: String(eventGuid++),
           title: 'nTimed evet',
           start: startDate + 'T12:00:00',
-          // end: startDate,
-          data: [[...job, jobName], as1, as2],
-          jobs: [...job, jobName],
-          assignees: as1,
-          assignees2: as2
-        }
-      ]))
+          data: [[],[],[]],
+        };
+    // console.log("existingJob", existingEvent)
 
-    } else {
+
+    // if (cellsExists) {
+    //   // TODO: instead, get data from jobsData
+    //   // const existingJob = jobsData.find(u => u.id === cellId);
+
+    //   // const foundData = jobsData.find((item) => {
+    //   //   if (item.start === startDate + 'T12:00:00') {
+    //   //     job = item.jobs
+    //   //     as1 = item.assignees
+    //   //     as2 = item.assignees2
+    //   //   }
+    //   // })
+
+    //   const textNodes = cellNodes[0].children[0].children 
+
+    //   job = textNodes[0].innerText.split('\n') 
+    //   as1 = textNodes[1].innerText.split('\n') 
+    //   as2 = textNodes[2].innerText.split('\n')
+    // } 
+
+
+    // if (assignJobDates) {
+    //   // assigning job name to a date
+    //   if (cellId !== null) {
+    //     const updatedItems = jobsData.filter(item => item.id !== cellId);
+    //     setJobsData(updatedItems)
+    //   }
+
+    //   setJobsData(prev => ([
+    //     ...prev,
+    //     {
+    //       id: String(eventGuid++),
+    //       title: 'nTimed evet',
+    //       start: startDate + 'T12:00:00',
+    //       // end: startDate,
+    //       data: existingData,
+    //       jobs: [...job, jobName],
+    //       assignees: as1,
+    //       assignees2: as2
+    //     }
+    //   ]))
+
+    // } else {
       setJobDate(startDate)
-      setModalData([job,as1,as2])
+      setModalEvent(existingEvent)
+      // setModalData([job, as1, as2])
       setShowDateModal(true)
-    }
+    // }
   }
 
 
@@ -140,10 +152,11 @@ const App = () => {
 
   const handleDateSubmit = (data) => {
     // clear the existing date assignments
-    const filteredItems = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
+    // const filteredJobs = jobsData
+    const filteredJobs = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
 
     setJobsData([
-      ...filteredItems,
+      ...filteredJobs,
       {
         id: String(eventGuid++),
         title: 'nTimed evet',
@@ -155,70 +168,62 @@ const App = () => {
     setModalData([[],[],[]]);
   }
 
-  const handleMultipleDates = (selectInfo) => {
-    // TODO: open jobs modal
-    const title = "TST"
-    multipleDatesModalReturn(title, selectInfo)
-  }
+  // const handleMultipleDates = (selectInfo) => {
+  //   // TODO: open jobs modal
+  //   const title = "MULTI"
+  //   multipleDatesModalReturn(title, selectInfo)
+  // }
 
-  const multipleDatesModalReturn = (title,data) => {
-    let currentDate = data.start;
-    const dates = [];
+  // const multipleDatesModalReturn = (title,data) => {
+  //   let currentDate = data.start;
+  //   const dates = [];
 
-    while (currentDate <= data.end) {
-      dates.push(new Date(currentDate));
-      // start: arg.date.toISOString().replace(/T.*$/, '')
-      let existingData = null
+  //   while (currentDate <= data.end) {
+  //     dates.push(new Date(currentDate));
+  //     // start: arg.date.toISOString().replace(/T.*$/, '')
+  //     let existingData = null
 
-      // get cell
-      jobsData.map((item) => {
-        if (item.start == currentDate) {
-          existingData = item
-        }
-        // item.start == currentDate ? console.log(item) : null;
-      })
+  //     // get cell
+  //     jobsData.map((item) => {
+  //       if (item.start == currentDate) {
+  //         existingData = item
+  //       }
+  //       // item.start == currentDate ? console.log(item) : null;
+  //     })
 
-      const jobs = []
-      const as1 = []
-      const as2 = []
+  //     const jobs = []
+  //     const as1 = []
+  //     const as2 = []
 
+  //     const filteredItems = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
 
-      const filteredItems = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
-
-      setJobsData([
-        ...filteredItems,
-        {
-          id: String(eventGuid++),
-          title: 'nTimed evet',
-          start: currentDate + 'T12:00:00',
-          data: [jobs, as1, as2],
-          jobs: jobs,
-          assignees: as1,
-          assignees2: as2
-        }
-      ])
-
-
-
-
+  //     setJobsData([
+  //       ...filteredItems,
+  //       {
+  //         id: String(eventGuid++),
+  //         title: 'nTimed evet',
+  //         start: currentDate + 'T12:00:00',
+  //         data: [jobs, as1, as2],
+  //       }
+  //     ])
       
-      currentDate.setDate(currentDate.getDate() + 1); 
-    }
-    // console.log(data)
-  }
+  //     currentDate.setDate(currentDate.getDate() + 1); 
+  //   }
+  //   // console.log(data)
+  // }
 
 
   const customRender = (args) => {
     const data = args.event.extendedProps
     console.log(data)
 
-    const newCol = (items, pref) => {
+    const newCol = (names, pref) => {
       return (
-        <div className="col">
-          {items.map((item, index) => (
+        <div key={pref+"col"} className="col">
+          {names.map((name, index) => (
             <div key={pref + index} className="row">
               <div className="col">
-                {item}
+                { name }
               </div>
             </div>
           ))}
@@ -230,13 +235,9 @@ const App = () => {
     
     return (
       <div className="row" itemID={args.event._def.publicId} style={{'height': '18px'}}>
-          { data.data.map((job, index) => (
-            newCol (job, "c"+index+"-")
+          { data.data.map((empList, index) => (
+            newCol (empList, "c"+index+"-")
           ))}
-          {/* { newCol (data.jobs, "jo-") }
-          { newCol (data.assignees, "a1-") }
-          { newCol (data.assignees2, "a2-") }
-          { newCol (data.assignees2, "a2-") } */}
       </div>
     )
   }
@@ -272,7 +273,7 @@ const App = () => {
                 <SidebarJob 
                   job={job} 
                   assignDates={toggleAssignJobDates} 
-                  setJobName={setJobName}  
+                  // setJobName={setJobName}  
                 />
               </div>
             ))}
@@ -286,7 +287,7 @@ const App = () => {
           editable={true}
           selectable={true}
           initialEvents={INITIAL_EVENTS}
-          select={handleMultipleDates}
+          // select={handleMultipleDates}
           dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
           events={jobsData}
@@ -303,10 +304,8 @@ const App = () => {
       <DateModal 
         show={showDateModal}
         date={jobDate}
+        dateEvent={modalEvent}
         data={modalData}
-        jobsList={modalData[0]}
-        assignmentsList1={modalData[1]}
-        assignmentsList2={modalData[2]}
         handleClose={toggleDateModal}
         onDateSubmit={handleDateSubmit}
       />
@@ -315,6 +314,11 @@ const App = () => {
 };
 
 export default App;
+
+          // {/* { newCol (data.jobs, "jo-") }
+          // { newCol (data.assignees, "a1-") }
+          // { newCol (data.assignees2, "a2-") }
+          // { newCol (data.assignees2, "a2-") } */}
 
     // DATE FORMATTING
     // setJobDate(arg.date.toISOString().replace(/T.*$/, ''))

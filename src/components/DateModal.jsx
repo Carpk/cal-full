@@ -7,15 +7,15 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 export default function DateModal({ show, date, data, handleClose, onDateSubmit}) {
-  const [jobs, setJobs] = useState([]);
-  const [jobData, setJobData] = useState();
+  // const [jobs, setJobs] = useState([]);
+  const [jobData, setJobData] = useState(data);
   // const [assignments, setAssignments
   // const [assignments1, setAssignments1] = useState([]);
   // const [assignments2, setAssignments2] = useState([]);
   const [inputValue, setInputValue] = useState('');
 
 
-  const [colOne, setColOne] = useState(true) // user ind instead
+  const [colOne, setColOne] = useState(true) // user colNum instead
   const [colNum, setColNum] = useState(1)
 
 
@@ -40,6 +40,7 @@ export default function DateModal({ show, date, data, handleClose, onDateSubmit}
   };
 
   const handleSubmit = () => {
+    // console.log("data handle submit", data)
     onDateSubmit(data);
     // setAssignments([[],[],[]]);
     setColOne(true)
@@ -69,14 +70,15 @@ export default function DateModal({ show, date, data, handleClose, onDateSubmit}
       <Modal.Body>
         <Form>
           <div className="row mb-5">
-            { data.map((section, index) => (
-              <div 
+            { jobData.map((section, index) => (
+              <div
+                key={"col"+index}
                 className="col" 
                 style={{ 'boxShadow': colNum === index ? '0px 4px 8px black': ''}}
                 onClick={() => handleOptionChange(index)}
               >
                 { section.map((name, index) => (
-                  <ListGroup.Item key={index}>{name}</ListGroup.Item>
+                  <ListGroup.Item key={"li"+index}>{name}</ListGroup.Item>
                 ))}
               </div>
             ))}
