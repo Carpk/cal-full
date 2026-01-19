@@ -6,26 +6,16 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 
-export default function DateModal({ show, date, data, handleClose, onDateSubmit}) {
-  // const [jobs, setJobs] = useState([]);
+export default function DateModal({ show, date, dateEvent, data, handleClose, onDateSubmit}) {
   const [jobData, setJobData] = useState(data);
-  // const [assignments, setAssignments
-  // const [assignments1, setAssignments1] = useState([]);
-  // const [assignments2, setAssignments2] = useState([]);
   const [inputValue, setInputValue] = useState('');
-
-
-  const [colOne, setColOne] = useState(true) // user colNum instead
   const [colNum, setColNum] = useState(1)
 
 
   useEffect(() => {
-    setJobData(data)
+    setJobData(dateEvent.data)
 
-    // setJobs(data[0])
-    // setAssignments1(data[1])
-    // setAssignments2(data[2])
-  }, [data])
+  }, [data, dateEvent])
 
 
 
@@ -33,23 +23,19 @@ export default function DateModal({ show, date, data, handleClose, onDateSubmit}
     
     if (e.key === 'Enter') {
       e.preventDefault();
-      // colOne ? setAssignments1([...assignments1, inputValue]) : setAssignments2([...assignments2, inputValue])
-      data[colNum].push(inputValue)
+      jobData[colNum].push(inputValue)
+
       setInputValue('')
     }
   };
 
   const handleSubmit = () => {
-    // console.log("data handle submit", data)
-    onDateSubmit(data);
-    // setAssignments([[],[],[]]);
-    setColOne(true)
+    onDateSubmit(jobData);
 
     handleClose();
   };
 
   const handleOptionChange = (val) => {
-    setColOne(!colOne)
     setColNum(val)
   }
 
@@ -57,7 +43,7 @@ export default function DateModal({ show, date, data, handleClose, onDateSubmit}
 
   }
 
-  const removeEle = (index) => {
+  const rmEle = (index) => {
 
   }
 
@@ -91,7 +77,7 @@ export default function DateModal({ show, date, data, handleClose, onDateSubmit}
                 label="Column 1"
                 name="group1"
                 type='radio'
-                checked={colOne}
+                checked={ colNum === 1}
                 id={`radio-1`}
                 onChange={() => handleOptionChange(1)}
               />
@@ -99,7 +85,7 @@ export default function DateModal({ show, date, data, handleClose, onDateSubmit}
                 label="Column 2"
                 name="group1"
                 type='radio'
-                checked={!colOne}
+                checked={colNum === 2}
                 id={`radio-2`}
                 onChange={() => handleOptionChange(2)}
               />

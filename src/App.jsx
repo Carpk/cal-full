@@ -21,6 +21,7 @@ import plusSquare from './assets/plus-square.svg'
 // Usage of mondaySDK example, for more information visit here: https://developer.monday.com/apps/docs/introduction-to-the-sdk/
 const monday = mondaySdk();
 let eventGuid = 0
+let jobGuid = 0
 const App = () => {
   const [context, setContext] = useState();
   
@@ -29,7 +30,8 @@ const App = () => {
   const [assignJobDates, setAssignJobDates] = useState(false);
 
   const [jobDate, setJobDate] = useState()
-  const [modalEvent, setModalEvent] = useState()
+  const [modalEvent, setModalEvent] = useState({data: [[],[],[]]})
+  const [modalHash, setModalHash] = useState({})
 
 
   const [jobsData, setJobsData] = useState([]);
@@ -77,76 +79,21 @@ const App = () => {
 
     const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
-    // let job = []
-    // let as1 = []
-    // let as2 = []
 
     // check for existing cell nodes, if exists, prepare contents for Modal
     const existingEvent = cellsExists ? jobsData.find(u => u.id === cellId) : {
-          id: String(eventGuid++),
-          title: 'nTimed evet',
-          start: startDate + 'T12:00:00',
-          data: [[],[],[]],
-        };
-    // console.log("existingJob", existingEvent)
+      id: String(eventGuid++),
+      title: 'nTimed evet',
+      start: startDate + 'T12:00:00',
+      data: [[],[],[]],
+    };
 
+    setModalHash({date: startDate, data: existingEvent.data})
 
-    // if (cellsExists) {
-    //   // TODO: instead, get data from jobsData
-    //   // const existingJob = jobsData.find(u => u.id === cellId);
-
-    //   // const foundData = jobsData.find((item) => {
-    //   //   if (item.start === startDate + 'T12:00:00') {
-    //   //     job = item.jobs
-    //   //     as1 = item.assignees
-    //   //     as2 = item.assignees2
-    //   //   }
-    //   // })
-
-    //   const textNodes = cellNodes[0].children[0].children 
-
-    //   job = textNodes[0].innerText.split('\n') 
-    //   as1 = textNodes[1].innerText.split('\n') 
-    //   as2 = textNodes[2].innerText.split('\n')
-    // } 
-
-
-    // if (assignJobDates) {
-    //   // assigning job name to a date
-    //   if (cellId !== null) {
-    //     const updatedItems = jobsData.filter(item => item.id !== cellId);
-    //     setJobsData(updatedItems)
-    //   }
-
-    //   setJobsData(prev => ([
-    //     ...prev,
-    //     {
-    //       id: String(eventGuid++),
-    //       title: 'nTimed evet',
-    //       start: startDate + 'T12:00:00',
-    //       // end: startDate,
-    //       data: existingData,
-    //       jobs: [...job, jobName],
-    //       assignees: as1,
-    //       assignees2: as2
-    //     }
-    //   ]))
-
-    // } else {
-      setJobDate(startDate)
-      setModalEvent(existingEvent)
-      // setModalData([job, as1, as2])
-      setShowDateModal(true)
-    // }
-  }
-
-
-  const handleJobSubmit = (data) => {
-    eventGuid = eventGuid + 1
-
-    data.id = eventGuid
-    data.color = colors[eventGuid%colors.length]
-    setJobsListing([...jobsListing, data])
+    setJobDate(startDate)
+    setModalEvent(existingEvent)
+    
+    setShowDateModal(true)
   }
 
 
@@ -212,6 +159,14 @@ const App = () => {
   //   // console.log(data)
   // }
 
+
+  const handleJobSubmit = (data) => {
+    jobGuid = jobGuid + 1
+
+    data.id = jobGuid
+    data.color = colors[jobGuid%colors.length]
+    setJobsListing([...jobsListing, data])
+  }
 
   const customRender = (args) => {
     const data = args.event.extendedProps
@@ -314,6 +269,45 @@ const App = () => {
 };
 
 export default App;
+
+
+
+    // if (assignJobDates) {
+    //   // assigning job name to a date
+    //   if (cellId !== null) {
+    //     const updatedItems = jobsData.filter(item => item.id !== cellId);
+    //     setJobsData(updatedItems)
+    //   }
+
+    //   setJobsData(prev => ([
+    //     ...prev,
+    //     {
+    //       id: String(eventGuid++),
+    //       title: 'nTimed evet',
+    //       start: startDate + 'T12:00:00',
+    //       // end: startDate,
+    //       data: existingData,
+    //       jobs: [...job, jobName],
+    //       assignees: as1,
+    //       assignees2: as2
+    //     }
+    //   ]))
+
+
+
+    // if (cellsExists) {
+    //   // TODO: instead, get data from jobsData
+    //   // const existingJob = jobsData.find(u => u.id === cellId);
+
+    //   // const foundData = jobsData.find((item) => {
+    //   //   if (item.start === startDate + 'T12:00:00') {
+    //   //     job = item.jobs
+    //   //     as1 = item.assignees
+    //   //     as2 = item.assignees2
+    //   //   }
+    //   // })
+
+
 
           // {/* { newCol (data.jobs, "jo-") }
           // { newCol (data.assignees, "a1-") }
