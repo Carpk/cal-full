@@ -29,13 +29,11 @@ const App = () => {
   const [showDateModal, setShowDateModal] = useState(false);
   const [assignJobDates, setAssignJobDates] = useState(false);
 
-  const [jobDate, setJobDate] = useState()
-  const [modalEvent, setModalEvent] = useState({data: [[],[],[]]})
-  const [modalHash, setModalHash] = useState({})
+  const [modalData, setModalData] = useState({data: [[]]})
 
+  const newData = [[],[],[]]
 
   const [jobsData, setJobsData] = useState([]);
-  const [modalData , setModalData] = useState([[],[],[]]);
   const [jobsListing, setJobsListing] = useState([]);
 
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
@@ -71,48 +69,38 @@ const App = () => {
 
   const handleDateClick = (arg) => {
     const cellNodes = arg.dayEl.children[0].children[1].children[0].children
-    const startDate = arg.date.toISOString().replace(/T.*$/, '')
-    console.log("startdate", startDate)
+    const startDate = arg.date.toISOString().replace(/T.*$/, '') + 'T12:00:00'
     const cellsExists = cellNodes.length > 0
-    console.log("cellNodes", arg.dayEl.children[0].children)
-    console.log("jobsData", jobsData)
+    console.log(startDate)
 
     const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
-
     // check for existing cell nodes, if exists, prepare contents for Modal
-    const existingEvent = cellsExists ? jobsData.find(u => u.id === cellId) : {
+    const dateData = cellsExists ? jobsData.find(u => u.id === cellId) : {
       id: String(eventGuid++),
-      title: 'nTimed evet',
-      start: startDate + 'T12:00:00',
-      data: [[],[],[]],
+      start: startDate ,
+      dateStr: new Date(startDate).toDateString(),
+      data: [[],[],[]] // [...newData]
     };
 
-    setModalHash({date: startDate, data: existingEvent.data})
-
-    setJobDate(startDate)
-    setModalEvent(existingEvent)
+    setModalData({id: dateData.id, start: dateData.start, dateStr: dateData.dateStr, data: dateData.data})
     
     setShowDateModal(true)
   }
 
-
-  const handleDateSubmit = (data) => {
+  const handleDateSubmit = (id, date, data) => {
     // clear the existing date assignments
-    // const filteredJobs = jobsData
-    const filteredJobs = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
+    const filteredJobs = jobsData.filter(item => item.id !== id);
 
     setJobsData([
       ...filteredJobs,
       {
-        id: String(eventGuid++),
-        title: 'nTimed evet',
-        start: jobDate + 'T12:00:00',
+        id: id,
+        start: date,
         data: data,
       }
     ])
     
-    setModalData([[],[],[]]);
   }
 
   // const handleMultipleDates = (selectInfo) => {
@@ -253,14 +241,13 @@ const App = () => {
       <JobModal 
         show={showJobModal} 
         // setJobTitle={setJobTitle}
+        dateEvent={modalData}
         handleClose={toggleJobsModal}
         returnData={handleJobSubmit}
       />
       <DateModal 
         show={showDateModal}
-        date={jobDate}
-        dateEvent={modalEvent}
-        data={modalData}
+        dateEvent={modalData}
         handleClose={toggleDateModal}
         onDateSubmit={handleDateSubmit}
       />
