@@ -7,7 +7,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import minusCircle from '../assets/dash-circle.svg'
 
 export default function DateModal({ show, dateEvent, handleClose, onDateSubmit}) {
-  const [jobData, setJobData] = useState([[]]);
+  const [jobData, setJobData] = useState([[],[],[]]);
   const [inputValue, setInputValue] = useState('');
   const [colNum, setColNum] = useState(1)
 

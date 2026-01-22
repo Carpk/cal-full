@@ -14,6 +14,8 @@ import interactionPlugin from "@fullcalendar/interaction"
 import { INITIAL_EVENTS } from './event-utils'
 import SidebarJob from './components/SidebarEvent'
 import JobModal from "./components/JobModal";
+import NewJobModal from "./components/JobModalNew";
+import EditJobModal from "./components/JobModalEdit";
 import DateModal from "./components/DateModal";
 import plusSquare from './assets/plus-square.svg'
 
@@ -29,8 +31,11 @@ const App = () => {
   const [showDateModal, setShowDateModal] = useState(false);
   const [assignJobDates, setAssignJobDates] = useState(false);
 
-  const dataTemplate = [[],[],[]]
-  const [modalData, setModalData] = useState({data: [...dataTemplate]})
+  const [showNewJobModal, setShowNewJobModal] = useState(false);
+  const [showEditJobModal, setShowEditJobModal] = useState(false);
+
+  const dataStruct = [[],[],[]]
+  const [modalData, setModalData] = useState({data: [...dataStruct], start: new Date(), end: new Date()})
 
   
   const [jobsData, setJobsData] = useState([]);
@@ -57,6 +62,11 @@ const App = () => {
     setShowJobModal(!showJobModal);
   };
 
+  const toggleNewJobModal = () => {
+    setShowNewJobModal(!showNewJobModal);
+  };
+
+
   const toggleDateModal = () => {
     setShowDateModal(!showDateModal);
   };
@@ -71,7 +81,6 @@ const App = () => {
     const cellNodes = arg.dayEl.children[0].children[1].children[0].children
     const startDate = arg.date.toISOString().replace(/T.*$/, '') + 'T12:00:00'
     const cellsExists = cellNodes.length > 0
-    console.log(startDate)
 
     const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
@@ -80,7 +89,7 @@ const App = () => {
       id: String(eventGuid++),
       start: startDate ,
       dateStr: new Date(startDate).toDateString(),
-      data: [...dataTemplate]
+      data: [...dataStruct]
     };
 
     setModalData({id: dateData.id, start: dateData.start, dateStr: dateData.dateStr, data: dateData.data})
@@ -103,14 +112,37 @@ const App = () => {
     
   }
 
-  const handleMultipleDates = (selectInfo) => {
-    console.log(selectInfo)
+  const handleNewJobModal = (selectInfo) => {
+    // console.log(selectInfo.view.calendar)
 
-    setModalData({})
+    setModalData({
+      start: selectInfo.start, 
+      end: selectInfo.end, 
+      color: colors[jobGuid%colors.length], 
+      data: [...dataStruct]
+    })
+    toggleNewJobModal()
   }
 
-  const multipleDatesModalReturn = (jobName, startDate, endDate, data) => {
-    let currentDate = startDate;
+  const handleJobSubmit = (data) => {
+    const endDate = data.endDate
+    let currentDate = data.startDate;
+
+     setJobsListing([
+      ...jobsListing,
+      {
+        id: String(jobGuid++),
+        title: data.title,
+        assignees: data.assignees,
+        start: currentDate, //
+        end: endDate,
+        dateStr: new Date(currentDate).toDateString(),
+        data: [...data.assignees],
+        color: data.color
+      }
+    ])
+
+    
 
     while (currentDate <= endDate) {
       const item = jobsData.find(u => u.start === currentDate)
@@ -118,10 +150,11 @@ const App = () => {
         id: String(eventGuid++),
         start: currentDate, // May need to format date
         dateStr: new Date(currentDate).toDateString(),
-        data: [[],[],[]] // [...newData]
+        data: [...dataStruct]
       };
 
-      dateData.data[0].push(jobName)
+      dateData.data[0].push(data.title)
+      
 
       // const filteredItems = jobsData.filter(item => item.start !== jobDate );
 
@@ -140,18 +173,26 @@ const App = () => {
     // console.log(data)
   }
 
+   const handleEditJobModal = (selectInfo) => {
+    // console.log(selectInfo.view.calendar)
 
-  const handleJobSubmit = (data) => {
-    jobGuid = jobGuid + 1
+    // find job in jobList > build modal data
 
-    data.id = jobGuid
-    data.color = colors[jobGuid%colors.length]
-    setJobsListing([...jobsListing, data])
+    setModalData({ start: selectInfo.start, end: selectInfo.end, data: [...dataStruct]})
+    // toggleEditJobModal()
   }
+
+
+  // const handleJobSubmit = (data) => {
+  //   jobGuid = jobGuid + 1
+
+  //   data.id = jobGuid
+  //   data.color = colors[jobGuid%colors.length]
+  //   setJobsListing([...jobsListing, data])
+  // }
 
   const customRender = (args) => {
     const data = args.event.extendedProps
-    console.log(data)
 
     const newCol = (names, pref) => {
       return (
@@ -223,26 +264,37 @@ const App = () => {
           editable={true}
           selectable={true}
           initialEvents={INITIAL_EVENTS}
-          select={handleMultipleDates}
+          select={handleNewJobModal}
           dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
           events={jobsData}
         />
       </div>
-
-
-      <JobModal 
-        show={showJobModal} 
-        // setJobTitle={setJobTitle}
-        dateEvent={modalData}
-        handleClose={toggleJobsModal}
-        returnData={handleJobSubmit}
-      />
       <DateModal 
         show={showDateModal}
         dateEvent={modalData}
         handleClose={toggleDateModal}
         onDateSubmit={handleDateSubmit}
+      />
+      {/* <JobModal 
+        show={showJobModal} 
+        // setJobTitle={setJobTitle}
+        dateEvent={modalData}
+        handleClose={toggleJobsModal}
+        returnData={handleJobSubmit}
+      /> */}
+      <NewJobModal 
+        show={showNewJobModal} 
+        datesEvent={modalData}
+        handleClose={toggleNewJobModal}
+        handleReturn={handleJobSubmit}
+      />
+      <EditJobModal 
+        show={showEditJobModal} 
+        // setJobTitle={setJobTitle}
+        dateEvent={modalData}
+        handleClose={toggleJobsModal}
+        handleReturn={handleJobSubmit}
       />
     </div>
   );
@@ -252,47 +304,9 @@ export default App;
 
 
 
-    // if (assignJobDates) {
-    //   // assigning job name to a date
-    //   if (cellId !== null) {
-    //     const updatedItems = jobsData.filter(item => item.id !== cellId);
-    //     setJobsData(updatedItems)
-    //   }
-
-    //   setJobsData(prev => ([
-    //     ...prev,
-    //     {
-    //       id: String(eventGuid++),
-    //       title: 'nTimed evet',
-    //       start: startDate + 'T12:00:00',
-    //       // end: startDate,
-    //       data: existingData,
-    //       jobs: [...job, jobName],
-    //       assignees: as1,
-    //       assignees2: as2
-    //     }
-    //   ]))
 
 
 
-    // if (cellsExists) {
-    //   // TODO: instead, get data from jobsData
-    //   // const existingJob = jobsData.find(u => u.id === cellId);
-
-    //   // const foundData = jobsData.find((item) => {
-    //   //   if (item.start === startDate + 'T12:00:00') {
-    //   //     job = item.jobs
-    //   //     as1 = item.assignees
-    //   //     as2 = item.assignees2
-    //   //   }
-    //   // })
-
-
-
-          // {/* { newCol (data.jobs, "jo-") }
-          // { newCol (data.assignees, "a1-") }
-          // { newCol (data.assignees2, "a2-") }
-          // { newCol (data.assignees2, "a2-") } */}
 
     // DATE FORMATTING
     // setJobDate(arg.date.toISOString().replace(/T.*$/, ''))
@@ -353,41 +367,10 @@ export default App;
   // }
 
 
-    // HASH STRUCTURE FOR JOBS
-    // console.log(val)
-    // console.log("in cellstruc: ", args)
+
     
     // const parsedDate = Date.parse(val)
     // console.log(val.toDateString())
     // const data = datesHash[val.toDateString()] // "Sun Dec 14 2025"
-    // console.log(data)
-
-    // const data = datesHash['fc-21'] // 'fc-dom-' + ard.dom.id
-    // console.log(args.el.id)
-
-    // BUILDING HASH STRUCTURE
-    // setDatesHash(prev => ({
-    //   ...prev, 
-    //   [manageDate]: {
-    //     'jobs': [],
-    //     'assignees': data,
-    //     'assignees2': []
-    //   }
-    // }));
-
-
-        // setDatesHash(prev => ({
-    //   ...prev, 
-    //   [manageDate]: {
-    //     id: String(eventGuid),
-    //     title: 'nTimed evet',
-    //     start: jobDate + 'T12:00:00',
-    //     jobs: jobs,
-    //     assignees: assignments1,
-    //     assignees2: assignments2
-    //   }
-    // }));
-
-
     // console.log("handle date str: ", arg.date.toISOString().replace(/T.*$/, ''))
     // arg.date.toDateString()
