@@ -4,7 +4,7 @@ import { Modal, Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import ListGroup from 'react-bootstrap/ListGroup';
 
-
+import minusCircle from '../assets/dash-circle.svg'
 
 export default function DateModal({ show, dateEvent, handleClose, onDateSubmit}) {
   const [jobData, setJobData] = useState([[]]);
@@ -17,10 +17,7 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
 
   }, [dateEvent])
 
-
-
   const handleKeyDown = (e) => {
-    
     if (e.key === 'Enter') {
       e.preventDefault();
       jobData[colNum].push(inputValue)
@@ -39,12 +36,14 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
     setColNum(val)
   }
 
-  const addEle = (index) => {
-
+  const addCol = () => {
+    jobData.push([])
   }
 
-  const rmEle = (index) => {
+  const rmEle = (c, r) => {
+    jobData[c].splice(r, 1)
 
+    // setJobData(jobData)
   }
 
 
@@ -56,15 +55,24 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
       <Modal.Body>
         <Form>
           <div className="row mb-5">
-            { jobData.map((dateColumn, index) => (
+            { jobData.map((dateColumn, colIndex) => (
               <div
-                key={"col"+index}
+                key={"col"+colIndex}
                 className="col" 
-                style={{ 'boxShadow': colNum === index ? '0px 4px 8px black': ''}}
-                onClick={() => handleOptionChange(index)}
+                style={{ 'boxShadow': colNum === colIndex ? '0px 4px 8px black': ''}}
+                onClick={() => handleOptionChange(colIndex)}
               >
+                <ListGroup.Item key={"colName"+colIndex}>col {colIndex}</ListGroup.Item>
                 { dateColumn.map((name, index) => (
-                  <ListGroup.Item key={"li"+index}>{name}</ListGroup.Item>
+                  <ListGroup.Item  key={"li"+index}>
+                    {name}
+                    <img src={minusCircle} 
+                      alt="remove a name"
+                      onClick={() => rmEle(colIndex, index)}
+                      style={{'marginLeft': '4px'}}
+                      width="11" 
+                    />
+                  </ListGroup.Item>
                 ))}
               </div>
             ))}

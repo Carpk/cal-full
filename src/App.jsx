@@ -29,10 +29,10 @@ const App = () => {
   const [showDateModal, setShowDateModal] = useState(false);
   const [assignJobDates, setAssignJobDates] = useState(false);
 
-  const [modalData, setModalData] = useState({data: [[]]})
+  const dataTemplate = [[],[],[]]
+  const [modalData, setModalData] = useState({data: [...dataTemplate]})
 
-  const newData = [[],[],[]]
-
+  
   const [jobsData, setJobsData] = useState([]);
   const [jobsListing, setJobsListing] = useState([]);
 
@@ -80,7 +80,7 @@ const App = () => {
       id: String(eventGuid++),
       start: startDate ,
       dateStr: new Date(startDate).toDateString(),
-      data: [[],[],[]] // [...newData]
+      data: [...dataTemplate]
     };
 
     setModalData({id: dateData.id, start: dateData.start, dateStr: dateData.dateStr, data: dateData.data})
@@ -103,49 +103,42 @@ const App = () => {
     
   }
 
-  // const handleMultipleDates = (selectInfo) => {
-  //   // TODO: open jobs modal
-  //   const title = "MULTI"
-  //   multipleDatesModalReturn(title, selectInfo)
-  // }
+  const handleMultipleDates = (selectInfo) => {
+    console.log(selectInfo)
 
-  // const multipleDatesModalReturn = (title,data) => {
-  //   let currentDate = data.start;
-  //   const dates = [];
+    setModalData({})
+  }
 
-  //   while (currentDate <= data.end) {
-  //     dates.push(new Date(currentDate));
-  //     // start: arg.date.toISOString().replace(/T.*$/, '')
-  //     let existingData = null
+  const multipleDatesModalReturn = (jobName, startDate, endDate, data) => {
+    let currentDate = startDate;
 
-  //     // get cell
-  //     jobsData.map((item) => {
-  //       if (item.start == currentDate) {
-  //         existingData = item
-  //       }
-  //       // item.start == currentDate ? console.log(item) : null;
-  //     })
+    while (currentDate <= endDate) {
+      const item = jobsData.find(u => u.start === currentDate)
+      const dateData = item !== undefined ? item : {
+        id: String(eventGuid++),
+        start: currentDate, // May need to format date
+        dateStr: new Date(currentDate).toDateString(),
+        data: [[],[],[]] // [...newData]
+      };
 
-  //     const jobs = []
-  //     const as1 = []
-  //     const as2 = []
+      dateData.data[0].push(jobName)
 
-  //     const filteredItems = jobsData.filter(item => item.start !== jobDate + 'T12:00:00');
+      // const filteredItems = jobsData.filter(item => item.start !== jobDate );
 
-  //     setJobsData([
-  //       ...filteredItems,
-  //       {
-  //         id: String(eventGuid++),
-  //         title: 'nTimed evet',
-  //         start: currentDate + 'T12:00:00',
-  //         data: [jobs, as1, as2],
-  //       }
-  //     ])
+      // setJobsData([
+      //   ...filteredItems,
+      //   {
+      //     id: String(eventGuid++),
+      //     title: 'nTimed evet',
+      //     start: currentDate + 'T12:00:00',
+      //     data: data,
+      //   }
+      // ])
       
-  //     currentDate.setDate(currentDate.getDate() + 1); 
-  //   }
-  //   // console.log(data)
-  // }
+      currentDate.setDate(currentDate.getDate() + 1); 
+    }
+    // console.log(data)
+  }
 
 
   const handleJobSubmit = (data) => {
@@ -230,7 +223,7 @@ const App = () => {
           editable={true}
           selectable={true}
           initialEvents={INITIAL_EVENTS}
-          // select={handleMultipleDates}
+          select={handleMultipleDates}
           dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
           events={jobsData}
