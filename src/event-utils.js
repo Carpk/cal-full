@@ -6,8 +6,6 @@ let tomorrow = new Date(today);
 tomorrow.setDate(today.getDate() + 1)
 tomorrow = tomorrow.toISOString().replace(/T.*$/, '')
 
-console.log("date string: ", todayStr)
-
 export const INITIAL_EVENTS = [
   // {
   //   id: createEventId(),

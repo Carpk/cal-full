@@ -38,7 +38,7 @@ const App = () => {
   const [modalData, setModalData] = useState({data: [...dataStruct], start: new Date(), end: new Date()})
 
   
-  const [jobsData, setJobsData] = useState([]);
+  const [dayEvents, setDayEvents] = useState([]);
   const [jobsListing, setJobsListing] = useState([]);
 
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
@@ -85,7 +85,7 @@ const App = () => {
     const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
     // check for existing cell nodes, if exists, prepare contents for Modal
-    const dateData = cellsExists ? jobsData.find(u => u.id === cellId) : {
+    const dateData = cellsExists ? dayEvents.find(u => u.id === cellId) : {
       id: String(eventGuid++),
       start: startDate ,
       dateStr: new Date(startDate).toDateString(),
@@ -99,9 +99,9 @@ const App = () => {
 
   const handleDateSubmit = (id, date, data) => {
     // clear the existing date assignments
-    const filteredJobs = jobsData.filter(item => item.id !== id);
+    const filteredJobs = dayEvents.filter(item => item.id !== id);
 
-    setJobsData([
+    setDayEvents([
       ...filteredJobs,
       {
         id: id,
@@ -113,7 +113,6 @@ const App = () => {
   }
 
   const handleNewJobModal = (selectInfo) => {
-    // console.log(selectInfo.view.calendar)
 
     setModalData({
       start: selectInfo.start, 
@@ -125,52 +124,47 @@ const App = () => {
   }
 
   const handleJobSubmit = (data) => {
-    const endDate = data.endDate
-    let currentDate = data.startDate;
+    const endDate = new Date(data.endDate)
+    let currentDate = new Date(data.startDate)
 
-     setJobsListing([
+    setJobsListing([
       ...jobsListing,
       {
         id: String(jobGuid++),
         title: data.title,
         assignees: data.assignees,
-        start: currentDate, //
+        start: currentDate, // What format to save these in?
         end: endDate,
-        dateStr: new Date(currentDate).toDateString(),
         data: [...data.assignees],
         color: data.color
       }
     ])
 
-    
+    // let todayStr = new Date().toISOString().replace(/T.*$/, 'T12:00:00')
+    // console.log("jobGUID: ", jobGuid)
 
     while (currentDate <= endDate) {
-      const item = jobsData.find(u => u.start === currentDate)
+      // console.log(currentDate)
+      const formattedDate = currentDate.toISOString().replace(/T.*$/, 'T12:00:00')
+      console.log(formattedDate)
+      const item = dayEvents.find(u => u.start === formattedDate)
       const dateData = item !== undefined ? item : {
         id: String(eventGuid++),
-        start: currentDate, // May need to format date
+        start: formattedDate, // Format: 2026-01-23T12:00:00
         dateStr: new Date(currentDate).toDateString(),
-        data: [...dataStruct]
+        data: [...dataStruct] // rename, again
       };
 
       dateData.data[0].push(data.title)
       
-
-      // const filteredItems = jobsData.filter(item => item.start !== jobDate );
-
-      // setJobsData([
-      //   ...filteredItems,
-      //   {
-      //     id: String(eventGuid++),
-      //     title: 'nTimed evet',
-      //     start: currentDate + 'T12:00:00',
-      //     data: data,
-      //   }
-      // ])
+      const filteredItems = dayEvents.filter(item => item.start !== formattedDate);
+      setDayEvents([         // change name: dailyDate, dailyAssignments
+        ...filteredItems,
+        dateData
+      ])
       
       currentDate.setDate(currentDate.getDate() + 1); 
     }
-    // console.log(data)
   }
 
    const handleEditJobModal = (selectInfo) => {
@@ -183,13 +177,13 @@ const App = () => {
   }
 
 
-  // const handleJobSubmit = (data) => {
-  //   jobGuid = jobGuid + 1
+  const handleEditJobSubmit = (data) => {
+    jobGuid = jobGuid + 1
 
-  //   data.id = jobGuid
-  //   data.color = colors[jobGuid%colors.length]
-  //   setJobsListing([...jobsListing, data])
-  // }
+    data.id = jobGuid
+    data.color = colors[jobGuid%colors.length]
+    setJobsListing([...jobsListing, data])
+  }
 
   const customRender = (args) => {
     const data = args.event.extendedProps
@@ -267,7 +261,7 @@ const App = () => {
           select={handleNewJobModal}
           dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
-          events={jobsData}
+          events={dayEvents}
         />
       </div>
       <DateModal 

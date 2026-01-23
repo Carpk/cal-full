@@ -49,11 +49,11 @@ export default function NewJobModal({show, datesEvent, handleClose, handleReturn
   };
 
   const handleSubmit = () => {
-    // handleClose()
+    handleClose()
 
     handleReturn({
       title: jobName.current.value, 
-      startDate: startDate, // change date format
+      startDate: startDate, 
       endDate: endDate, 
       color: color,
       assignees: assignees
