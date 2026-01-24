@@ -34,12 +34,12 @@ const App = () => {
   const [showNewJobModal, setShowNewJobModal] = useState(false);
   const [showEditJobModal, setShowEditJobModal] = useState(false);
 
-  const dataStruct = [[],[],[]]
-  const [modalData, setModalData] = useState({data: [...dataStruct], start: new Date(), end: new Date()})
+  // const dataStruct = [[],[],[]]
+  const [modalData, setModalData] = useState({data: [[],[],[]], start: new Date(), end: new Date()})
 
   
-  const [dayEvents, setDayEvents] = useState([]);
-  const [jobsListing, setJobsListing] = useState([]);
+  const [dailySchedule, setDailySchedule] = useState([]);
+  const [activeJobs, setActiveJobs] = useState([]);
 
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
   
@@ -85,11 +85,11 @@ const App = () => {
     const cellId = cellsExists ? cellNodes[0].children[0].attributes.itemID.value : null;
 
     // check for existing cell nodes, if exists, prepare contents for Modal
-    const dateData = cellsExists ? dayEvents.find(u => u.id === cellId) : {
+    const dateData = cellsExists ? dailySchedule.find(u => u.id === cellId) : {
       id: String(eventGuid++),
       start: startDate ,
       dateStr: new Date(startDate).toDateString(),
-      data: [...dataStruct]
+      data: [[[],[],[]]]
     };
 
     setModalData({id: dateData.id, start: dateData.start, dateStr: dateData.dateStr, data: dateData.data})
@@ -99,9 +99,9 @@ const App = () => {
 
   const handleDateSubmit = (id, date, data) => {
     // clear the existing date assignments
-    const filteredJobs = dayEvents.filter(item => item.id !== id);
+    const filteredJobs = dailySchedule.filter(item => item.id !== id);
 
-    setDayEvents([
+    setDailySchedule([
       ...filteredJobs,
       {
         id: id,
@@ -113,12 +113,13 @@ const App = () => {
   }
 
   const handleNewJobModal = (selectInfo) => {
+    console.log(dailySchedule)
 
     setModalData({
       start: selectInfo.start, 
       end: selectInfo.end, 
       color: colors[jobGuid%colors.length], 
-      data: [...dataStruct]
+      data: [[[],[],[]]]
     })
     toggleNewJobModal()
   }
@@ -126,9 +127,10 @@ const App = () => {
   const handleJobSubmit = (data) => {
     const endDate = new Date(data.endDate)
     let currentDate = new Date(data.startDate)
+    let tempSched = dailySchedule
 
-    setJobsListing([
-      ...jobsListing,
+    setActiveJobs([
+      ...activeJobs,
       {
         id: String(jobGuid++),
         title: data.title,
@@ -140,39 +142,34 @@ const App = () => {
       }
     ])
 
-    // let todayStr = new Date().toISOString().replace(/T.*$/, 'T12:00:00')
-    // console.log("jobGUID: ", jobGuid)
-
     while (currentDate <= endDate) {
-      // console.log(currentDate)
       const formattedDate = currentDate.toISOString().replace(/T.*$/, 'T12:00:00')
-      console.log(formattedDate)
-      const item = dayEvents.find(u => u.start === formattedDate)
-      const dateData = item !== undefined ? item : {
+      
+      const foundData = dailySchedule.find(u => u.start === formattedDate)
+      const dayData = foundData !== undefined ? foundData : {
         id: String(eventGuid++),
         start: formattedDate, // Format: 2026-01-23T12:00:00
         dateStr: new Date(currentDate).toDateString(),
-        data: [...dataStruct] // rename, again
+        data: [[],[],[]] // rename, again
       };
 
-      dateData.data[0].push(data.title)
+      dayData.data[0].push(data.title)
       
-      const filteredItems = dayEvents.filter(item => item.start !== formattedDate);
-      setDayEvents([         // change name: dailyDate, dailyAssignments
-        ...filteredItems,
-        dateData
-      ])
-      
+      const filteredSched = tempSched.filter(event => event.start !== formattedDate);
+      tempSched = [...filteredSched, dayData]
+
       currentDate.setDate(currentDate.getDate() + 1); 
     }
+    
+    setDailySchedule([...tempSched])
   }
 
    const handleEditJobModal = (selectInfo) => {
-    // console.log(selectInfo.view.calendar)
+    console.log(selectInfo)
 
     // find job in jobList > build modal data
 
-    setModalData({ start: selectInfo.start, end: selectInfo.end, data: [...dataStruct]})
+    // setModalData({ start: selectInfo.start, end: selectInfo.end, data: [[[],[],[]]]})
     // toggleEditJobModal()
   }
 
@@ -182,7 +179,7 @@ const App = () => {
 
     data.id = jobGuid
     data.color = colors[jobGuid%colors.length]
-    setJobsListing([...jobsListing, data])
+    setActiveJobs([...activeJobs, data])
   }
 
   const customRender = (args) => {
@@ -225,7 +222,7 @@ const App = () => {
         <div className='app-sidebar-section'>
           <div className="row">
             <div className="col">
-              <h2>Jobs ({jobsListing.length})</h2>
+              <h2>Jobs ({activeJobs.length})</h2>
             </div>
             <div className="col">
               <button className='btn-link flt-right' style={{'marginTop': '4px'}} onClick={toggleJobsModal} type="button">
@@ -239,12 +236,12 @@ const App = () => {
             </div>
           </div>
           <div className="row">
-            { jobsListing.map((job) => (
+            { activeJobs.map((job) => (
               <div key={job.id} className="col">
                 <SidebarJob 
                   job={job} 
-                  assignDates={toggleAssignJobDates} 
-                  // setJobName={setJobName}  
+                  assignDates={toggleAssignJobDates}
+                  editJob={handleEditJobModal}
                 />
               </div>
             ))}
@@ -261,7 +258,7 @@ const App = () => {
           select={handleNewJobModal}
           dateClick={handleDateClick}
           eventContent={(arg) => (customRender(arg))}
-          events={dayEvents}
+          events={dailySchedule}
         />
       </div>
       <DateModal 

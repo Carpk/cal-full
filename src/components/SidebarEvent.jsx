@@ -9,7 +9,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import gear from '../assets/gear.svg'
 
 
-export default function SidebarJob({ job, assignDates, setJobName }) {
+export default function SidebarJob({ job, assignDates, editJob }) {
   const [employees, setEmployees] = useState([])
   const [inputValue, setInputValue] = useState('');
   // const [lock, setLock] = useState("loc")
@@ -35,8 +35,7 @@ export default function SidebarJob({ job, assignDates, setJobName }) {
       <Card.Body>
         <Card.Title style={{ color: job.color }}>
           {job.title}
-          <button className="btn-link flt-right" onClick={toggleLock}>
-            {/* {lock} */}
+          <button className="btn-link flt-right" onClick={() => editJob}>
             <img src={ gear } 
               alt="lock icon"
               style={{'marginTop': '-4px'}}
