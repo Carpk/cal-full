@@ -27,19 +27,20 @@ let jobGuid = 0
 const App = () => {
   const [context, setContext] = useState();
   
-  const [showJobModal, setShowJobModal] = useState(false);
-  const [showDateModal, setShowDateModal] = useState(false);
-  const [assignJobDates, setAssignJobDates] = useState(false);
+  const [showJobModal, setShowJobModal] = useState(false); // old Job modal
+    // const [assignJobDates, setAssignJobDates] = useState(false);
 
+  const [showDateModal, setShowDateModal] = useState(false);
   const [showNewJobModal, setShowNewJobModal] = useState(false);
   const [showEditJobModal, setShowEditJobModal] = useState(false);
 
   // const dataStruct = [[],[],[]]
-  const [modalData, setModalData] = useState({data: [[],[],[]], start: new Date(), end: new Date()})
-
+  const [modalData, setModalData] = useState({data: [[],[],[]]})
+  const [jobModalData, setJobModalData] = useState({start: new Date(), end: new Date()})
+  // might need two, one for Jobs and one for Dates
   
   const [dailySchedule, setDailySchedule] = useState([]);
-  const [activeJobs, setActiveJobs] = useState([]);
+  const [currentJobs, setCurrentJobs] = useState([]);
 
   const colors = ["#FF0000", "#0000FF", "#00c400ff", "#c98200ff", "#800080", "#008080", "#FFD700"]
   
@@ -71,8 +72,8 @@ const App = () => {
     setShowDateModal(!showDateModal);
   };
 
-  const toggleAssignJobDates = () => {
-    setAssignJobDates(!assignJobDates);
+  const toggleEditJobModal = () => {
+    setShowEditJobModal(!showEditJobModal);
   };
 
 
@@ -109,19 +110,19 @@ const App = () => {
         data: data,
       }
     ])
-    
   }
 
   const handleNewJobModal = (selectInfo) => {
-    console.log(dailySchedule)
-
-    setModalData({
+    setJobModalData({
       start: selectInfo.start, 
       end: selectInfo.end, 
       color: colors[jobGuid%colors.length], 
       data: [[[],[],[]]]
     })
-    toggleNewJobModal()
+
+    if (!showDateModal) {
+      toggleNewJobModal()
+    }
   }
 
   const handleJobSubmit = (data) => {
@@ -129,8 +130,8 @@ const App = () => {
     let currentDate = new Date(data.startDate)
     let tempSched = dailySchedule
 
-    setActiveJobs([
-      ...activeJobs,
+    setCurrentJobs([
+      ...currentJobs,
       {
         id: String(jobGuid++),
         title: data.title,
@@ -150,7 +151,7 @@ const App = () => {
         id: String(eventGuid++),
         start: formattedDate, // Format: 2026-01-23T12:00:00
         dateStr: new Date(currentDate).toDateString(),
-        data: [[],[],[]] // rename, again
+        data: [[],[],[]] // rename
       };
 
       dayData.data[0].push(data.title)
@@ -164,10 +165,22 @@ const App = () => {
     setDailySchedule([...tempSched])
   }
 
-   const handleEditJobModal = (selectInfo) => {
-    console.log(selectInfo)
+   const handleEditJobModal = (jobId) => {
+    console.log(jobId)
 
     // find job in jobList > build modal data
+    const job = currentJobs.find(u => u.id === jobId)
+
+    setModalData({
+      start: job.start, 
+      end: job.end,
+      data: job.data,
+      color: job.color
+    })
+
+    
+    toggleEditJobModal()
+    
 
     // setModalData({ start: selectInfo.start, end: selectInfo.end, data: [[[],[],[]]]})
     // toggleEditJobModal()
@@ -179,7 +192,7 @@ const App = () => {
 
     data.id = jobGuid
     data.color = colors[jobGuid%colors.length]
-    setActiveJobs([...activeJobs, data])
+    setCurrentJobs([...currentJobs, data])
   }
 
   const customRender = (args) => {
@@ -222,7 +235,7 @@ const App = () => {
         <div className='app-sidebar-section'>
           <div className="row">
             <div className="col">
-              <h2>Jobs ({activeJobs.length})</h2>
+              <h2>Jobs ({currentJobs.length})</h2>
             </div>
             <div className="col">
               <button className='btn-link flt-right' style={{'marginTop': '4px'}} onClick={toggleJobsModal} type="button">
@@ -236,11 +249,10 @@ const App = () => {
             </div>
           </div>
           <div className="row">
-            { activeJobs.map((job) => (
+            { currentJobs.map((job) => (
               <div key={job.id} className="col">
                 <SidebarJob 
                   job={job} 
-                  assignDates={toggleAssignJobDates}
                   editJob={handleEditJobModal}
                 />
               </div>
@@ -254,9 +266,9 @@ const App = () => {
           initialView="dayGridMonth"
           editable={true}
           selectable={true}
-          initialEvents={INITIAL_EVENTS}
-          select={handleNewJobModal}
           dateClick={handleDateClick}
+          select={handleNewJobModal}
+          initialEvents={INITIAL_EVENTS}
           eventContent={(arg) => (customRender(arg))}
           events={dailySchedule}
         />
@@ -276,14 +288,14 @@ const App = () => {
       /> */}
       <NewJobModal 
         show={showNewJobModal} 
-        datesEvent={modalData}
+        dateEvent={jobModalData}
         handleClose={toggleNewJobModal}
         handleReturn={handleJobSubmit}
       />
       <EditJobModal 
         show={showEditJobModal} 
         // setJobTitle={setJobTitle}
-        dateEvent={modalData}
+        dateEvent={jobModalData}
         handleClose={toggleJobsModal}
         handleReturn={handleJobSubmit}
       />

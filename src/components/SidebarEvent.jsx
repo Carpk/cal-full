@@ -9,25 +9,12 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import gear from '../assets/gear.svg'
 
 
-export default function SidebarJob({ job, assignDates, editJob }) {
-  const [employees, setEmployees] = useState([])
-  const [inputValue, setInputValue] = useState('');
-  // const [lock, setLock] = useState("loc")
-
+export default function SidebarJob({ job, editJob }) {
   
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      setEmployees([...employees, inputValue])
-      // clear the input after submission
-      setInputValue('')
-    }
-  };
+  const toggleModal = () => {
 
-  const toggleLock = () => {
-
-    //open edit modal
-    assignDates()
+    editJob()
   }
   
   return (
@@ -35,7 +22,7 @@ export default function SidebarJob({ job, assignDates, editJob }) {
       <Card.Body>
         <Card.Title style={{ color: job.color }}>
           {job.title}
-          <button className="btn-link flt-right" onClick={() => editJob}>
+          <button className="btn-link flt-right" onClick={() => editJob(job.id)}>
             <img src={ gear } 
               alt="lock icon"
               style={{'marginTop': '-4px'}}
@@ -43,10 +30,9 @@ export default function SidebarJob({ job, assignDates, editJob }) {
             />
           </button>
         </Card.Title>
-          { job.assignees.map((name, index) => (
-            <ListGroup.Item key={index}>{name}</ListGroup.Item>
-          ))}
-
+        { job.assignees.map((name, index) => (
+          <ListGroup.Item key={index}>{name}</ListGroup.Item>
+        ))}
       </Card.Body>
     </Card>
   )

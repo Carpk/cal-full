@@ -6,7 +6,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 
 
-export default function NewJobModal({show, datesEvent, handleClose, handleReturn}) {
+export default function NewJobModal({show, dateEvent, handleClose, handleReturn}) {
   const [assignees, setAssignees] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [startDate, setStartDate] = useState();
@@ -15,12 +15,12 @@ export default function NewJobModal({show, datesEvent, handleClose, handleReturn
   const jobName = useRef(null);
 
 
-
+  //crashing on date select 
   useEffect(() => {
-    setStartDate(datesEvent.start.toISOString().replace(/T.*$/, ''))
-    setEndDate(datesEvent.end.toISOString().replace(/T.*$/, ''))
-    setColor(datesEvent.color)
-  }, [datesEvent]);
+    setStartDate(dateEvent.start.toISOString().replace(/T.*$/, ''))
+    setEndDate(dateEvent.end.toISOString().replace(/T.*$/, ''))
+    setColor(dateEvent.color)
+  }, [dateEvent]);
 
 
 
@@ -78,7 +78,7 @@ export default function NewJobModal({show, datesEvent, handleClose, handleReturn
           <Form.Control
             type="color"
             id="ColorInput"
-            defaultValue={datesEvent.color}
+            defaultValue={dateEvent.color}
             onChange={changeColor}
             title="Choose your color"
           />
