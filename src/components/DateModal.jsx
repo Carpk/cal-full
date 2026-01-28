@@ -7,27 +7,27 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import minusCircle from '../assets/dash-circle.svg'
 
 export default function DateModal({ show, dateEvent, handleClose, onDateSubmit}) {
-  const [jobData, setJobData] = useState([[],[],[]]);
+  const [dateData, setDateData] = useState([[],[],[]]);
   const [inputValue, setInputValue] = useState('');
   const [colNum, setColNum] = useState(1)
 
 
   useEffect(() => {
-    setJobData(dateEvent.data)
+    setDateData(dateEvent.data)
 
   }, [dateEvent])
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      jobData[colNum].push(inputValue)
+      dateData[colNum].push(inputValue)
 
       setInputValue('')
     }
   };
 
   const handleSubmit = () => {
-    onDateSubmit(dateEvent.id, dateEvent.start, jobData);
+    onDateSubmit(dateEvent.id, dateEvent.start, dateData);
 
     handleClose();
   };
@@ -37,25 +37,23 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
   }
 
   const addCol = () => {
-    jobData.push([])
+    dateData.push([])
   }
 
   const rmEle = (c, r) => {
-    jobData[c].splice(r, 1)
-
-    // setJobData(jobData)
+    dateData[c].splice(r, 1)
   }
 
 
   return (
     <Modal show={show} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>{dateEvent.dateStr}</Modal.Title>
+        <Modal.Title>{dateEvent.textDate}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <div className="row mb-5">
-            { jobData.map((dateColumn, colIndex) => (
+            { dateData.map((dateColumn, colIndex) => (
               <div
                 key={"col"+colIndex}
                 className="col" 

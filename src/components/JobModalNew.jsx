@@ -17,8 +17,8 @@ export default function NewJobModal({show, dateEvent, handleClose, handleReturn}
 
   //crashing on date select 
   useEffect(() => {
-    setStartDate(dateEvent.start.toISOString().replace(/T.*$/, ''))
-    setEndDate(dateEvent.end.toISOString().replace(/T.*$/, ''))
+    setStartDate(dateEvent.start)
+    setEndDate(dateEvent.end)
     setColor(dateEvent.color)
   }, [dateEvent]);
 
@@ -39,12 +39,11 @@ export default function NewJobModal({show, dateEvent, handleClose, handleReturn}
   };
 
   const changeEndDate = (event) => {
+    // save date formatted as 2026-01-17
     setEndDate(event.target.value);
   };
 
   const changeColor = (event) => {
-    // datesEvent.color = event.target.value;
-    console.log("COLOR: ", event.target.value)
     setColor(event.target.value);
   };
 

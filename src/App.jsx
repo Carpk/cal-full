@@ -36,7 +36,8 @@ const App = () => {
 
   // const dataStruct = [[],[],[]]
   const [modalData, setModalData] = useState({data: [[],[],[]]})
-  const [jobModalData, setJobModalData] = useState({start: new Date(), end: new Date()})
+  const date = new Date()
+  const [jobModalData, setJobModalData] = useState({start: date.toISOString().replace(/T.*$/, ''), end: date.toISOString().replace(/T.*$/, ''), data: []})
   // might need two, one for Jobs and one for Dates
   
   const [dailySchedule, setDailySchedule] = useState([]);
@@ -76,6 +77,7 @@ const App = () => {
     setShowEditJobModal(!showEditJobModal);
   };
 
+  
 
 
   const handleDateClick = (arg) => {
@@ -90,7 +92,7 @@ const App = () => {
       id: String(eventGuid++),
       start: startDate ,
       dateStr: new Date(startDate).toDateString(),
-      data: [[[],[],[]]]
+      data: [[],[],[]]
     };
 
     setModalData({id: dateData.id, start: dateData.start, dateStr: dateData.dateStr, data: dateData.data})
@@ -112,12 +114,23 @@ const App = () => {
     ])
   }
 
+  const handleNewJobButton = () => {
+    const data = {
+      start: new Date(),
+      end: new Date(),
+    }
+
+    handleNewJobModal(data)
+  }
+
   const handleNewJobModal = (selectInfo) => {
+    // console.log(selectInfo.end)
+
     setJobModalData({
-      start: selectInfo.start, 
-      end: selectInfo.end, 
+      start: selectInfo.start.toISOString().replace(/T.*$/, ''), 
+      end: selectInfo.end.toISOString().replace(/T.*$/, ''), 
       color: colors[jobGuid%colors.length], 
-      data: [[[],[],[]]]
+      data: [[],[],[]]
     })
 
     if (!showDateModal) {
@@ -136,21 +149,22 @@ const App = () => {
         id: String(jobGuid++),
         title: data.title,
         assignees: data.assignees,
-        start: currentDate, // What format to save these in?
-        end: endDate,
+        start: data.startDate, // What format to save these in?
+        end: data.endDate, // format for input: yyyy-mm-dd
         data: [...data.assignees],
         color: data.color
       }
     ])
 
     while (currentDate <= endDate) {
-      const formattedDate = currentDate.toISOString().replace(/T.*$/, 'T12:00:00')
+      const formattedDate = currentDate.toISOString().replace(/T.*$/, '')
+      // .toISOString().replace(/T.*$/, '')
       
       const foundData = dailySchedule.find(u => u.start === formattedDate)
       const dayData = foundData !== undefined ? foundData : {
         id: String(eventGuid++),
-        start: formattedDate, // Format: 2026-01-23T12:00:00
-        dateStr: new Date(currentDate).toDateString(),
+        start: formattedDate + 'T12:00:00', // needed format: yyy-mm-ddT12:00:00
+        textDate: new Date(currentDate).toDateString(),
         data: [[],[],[]] // rename
       };
 
@@ -165,18 +179,22 @@ const App = () => {
     setDailySchedule([...tempSched])
   }
 
-   const handleEditJobModal = (jobId) => {
-    console.log(jobId)
+  const handleEditJobModal = (jobId) => {
+    // console.log(jobId)
 
     // find job in jobList > build modal data
     const job = currentJobs.find(u => u.id === jobId)
+    // console.log(job)
 
-    setModalData({
-      start: job.start, 
-      end: job.end,
-      data: job.data,
-      color: job.color
-    })
+    setJobModalData(job)
+    // setJobModalData({
+    //   title: job.title,
+    //   start: job.start, 
+    //   end: job.end,
+    //   assignees: job.assignees,
+    //   data: job.data,
+    //   color: job.color
+    // })
 
     
     toggleEditJobModal()
@@ -238,7 +256,13 @@ const App = () => {
               <h2>Jobs ({currentJobs.length})</h2>
             </div>
             <div className="col">
-              <button className='btn-link flt-right' style={{'marginTop': '4px'}} onClick={toggleJobsModal} type="button">
+
+              <button 
+                className='btn-link flt-right' 
+                style={{'marginTop': '4px'}} 
+                onClick={handleNewJobButton} 
+                type="button"
+              >
                 <img src={plusSquare} 
                   alt="add a new job"
                   style={{'marginTop': '3px'}}
@@ -264,11 +288,12 @@ const App = () => {
         <FullCalendar
           plugins={[ dayGridPlugin, interactionPlugin ]}
           initialView="dayGridMonth"
+          nextDayThreshold= '12:00:00'
           editable={true}
-          selectable={true}
+          selectable={false}
           dateClick={handleDateClick}
           select={handleNewJobModal}
-          initialEvents={INITIAL_EVENTS}
+          // initialEvents={INITIAL_EVENTS}
           eventContent={(arg) => (customRender(arg))}
           events={dailySchedule}
         />
@@ -279,13 +304,7 @@ const App = () => {
         handleClose={toggleDateModal}
         onDateSubmit={handleDateSubmit}
       />
-      {/* <JobModal 
-        show={showJobModal} 
-        // setJobTitle={setJobTitle}
-        dateEvent={modalData}
-        handleClose={toggleJobsModal}
-        returnData={handleJobSubmit}
-      /> */}
+
       <NewJobModal 
         show={showNewJobModal} 
         dateEvent={jobModalData}
@@ -295,8 +314,8 @@ const App = () => {
       <EditJobModal 
         show={showEditJobModal} 
         // setJobTitle={setJobTitle}
-        dateEvent={jobModalData}
-        handleClose={toggleJobsModal}
+        existingJob={jobModalData}
+        handleClose={toggleEditJobModal}
         handleReturn={handleJobSubmit}
       />
     </div>
