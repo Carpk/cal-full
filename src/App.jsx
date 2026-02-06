@@ -24,6 +24,7 @@ import plusSquare from './assets/plus-square.svg'
 const monday = mondaySdk();
 let eventGuid = 0
 let jobGuid = 0
+
 const App = () => {
   const [context, setContext] = useState();
   
@@ -53,12 +54,62 @@ const App = () => {
     monday.execute("valueCreatedForUser");
 
     // TODO: set up event listeners, Here`s an example, read more here: https://developer.monday.com/apps/docs/mondaylisten/
-    monday.listen("context", (res) => {
-      setContext(res.data);
-    });
+    // monday.listen("context", (res) => {
+    //   // setContext(res.data);
+    //   console.log(res.data)
+    // });
+
+    // monday.storage.instance.getItem('serialKey').then(res => {
+    //   const { value, version } = res.data;
+    //   // sleep(10000); // someone may overwrite serialKey during this time
+
+    //   monday.storage.instance.setItem('serialKey', { previous_version: version }).then(res => {
+    //     console.log(res);
+    //   })
+    // });
+
+    // monday.storage.getItem('jobs').then(res => {
+    //   if (res.data !== undefined) {
+    //     // setDailySchedule(res.data)
+    //   }
+    //   console.log(res.data);
+    // });
 
 
+    // monday.storage.instance.setItem('jobs', ).then(res => {
+    // console.log(res);
+    // });
+    monday.get("context").then(console.log);
+    retrieveJobs()
   }, []);
+
+
+  const storeJobs = async () => {
+    // currentJobs
+    const jobs = "job test string"
+    const res = await monday.storage.setItem('jobs', JSON.stringify(jobs))
+
+    console.log("store res: ", res);
+  }
+
+  const retrieveJobs = async () => {
+    const res = await monday.storage.getItem('jobs');
+
+    const raw = res?.data?.value;
+    // const jobs = raw ? JSON.parse(raw) : currentJobs;
+
+    // setCurrentJobs(jobs);
+
+
+    // monday.storage.getItem('jobs').then(res => {
+    //   if (res.data != undefined) {
+    //     // setDailySchedule(res.data)
+    //   }
+    //   console.log(res?.data?.value);
+    // });
+
+    console.log("retriv res: ", res?.data?.value);
+  }
 
   const toggleJobsModal = () => {
     setShowJobModal(!showJobModal);
@@ -98,6 +149,7 @@ const App = () => {
     setModalData({id: dateData.id, start: dateData.start, dateStr: dateData.dateStr, data: dateData.data})
     
     setShowDateModal(true)
+    retrieveJobs()
   }
 
   const handleDateSubmit = (id, date, data) => {
@@ -133,6 +185,7 @@ const App = () => {
       data: [[],[],[]]
     })
 
+    // sleep(10000);
     if (!showDateModal) {
       toggleNewJobModal()
     }
@@ -177,6 +230,7 @@ const App = () => {
     }
     
     setDailySchedule([...tempSched])
+    storeJobs()
   }
 
   const handleEditJobModal = (jobId) => {
