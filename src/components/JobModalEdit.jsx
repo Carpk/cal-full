@@ -7,8 +7,6 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import minusCircle from '../assets/dash-circle.svg'
 
 export default function EditJobModal({ show, existingJob, handleClose, handleReturn}) {
-  const [jobData, setJobData] = useState()
-
   const [title, setTitle] = useState("")
   const [color, setColor] = useState('#000000')
   const [startDate, setStartDate] = useState();
@@ -16,11 +14,9 @@ export default function EditJobModal({ show, existingJob, handleClose, handleRet
   const [assignees, setAssignees] = useState([]);
 
   const [inputValue, setInputValue] = useState('');
-  const jobName = useRef(null);
+  // const jobName = useRef(null);
 
   useEffect(() => {
-    setJobData(existingJob)
-
     setTitle(existingJob.title)
     setStartDate(existingJob.start)
     setEndDate(existingJob.end)
@@ -40,15 +36,20 @@ export default function EditJobModal({ show, existingJob, handleClose, handleRet
     handleClose()
 
     handleReturn({
-      title: jobName.current.value, 
+      title: title, 
       startDate: startDate, 
       endDate: endDate, 
       color: color,
-      ssignees: assignees
+      assignees: assignees
     });
 
     setAssignees([])
   };
+
+  const changeTitle = (event) => {
+    setTitle(event.target.value);
+  };
+
 
   const changeStartDate = (event) => {
     setStartDate(event.target.value);
@@ -63,7 +64,7 @@ export default function EditJobModal({ show, existingJob, handleClose, handleRet
   };
 
   const rmEle = ( r) => {
-    jobData.data.splice(r, 1)
+    assignees.splice(r, 1)
   }
 
 
@@ -75,7 +76,7 @@ export default function EditJobModal({ show, existingJob, handleClose, handleRet
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3" controlId="formJobName">
-            <Form.Control type="text" ref={jobName}  value={title}/>
+            <Form.Control type="text" defaultValue={title} onChange={changeTitle}/>
           </Form.Group>
 
           <Form.Label htmlFor="colorInput">Color picker</Form.Label>

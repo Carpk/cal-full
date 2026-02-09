@@ -84,11 +84,9 @@ const App = () => {
   }, []);
 
 
-  const storeJobs = async () => {
-    // currentJobs
-    const jobs = "job test string"
-    const res = await monday.storage.setItem('jobs', JSON.stringify(jobs))
 
+  const storeJobs = async () => {
+    const res = await monday.storage.setItem('jobs', JSON.stringify(currentJobs))
     console.log("store res: ", res);
   }
 
@@ -96,19 +94,11 @@ const App = () => {
     const res = await monday.storage.getItem('jobs');
 
     const raw = res?.data?.value;
-    // const jobs = raw ? JSON.parse(raw) : currentJobs;
-
+    const jobs = raw ? JSON.parse(raw) : currentJobs;
+    console.log(jobs)
     // setCurrentJobs(jobs);
 
-
-    // monday.storage.getItem('jobs').then(res => {
-    //   if (res.data != undefined) {
-    //     // setDailySchedule(res.data)
-    //   }
-    //   console.log(res?.data?.value);
-    // });
-
-    console.log("retriv res: ", res?.data?.value);
+    // console.log("retriv res: ", res?.data?.value);
   }
 
   const toggleJobsModal = () => {
@@ -191,6 +181,7 @@ const App = () => {
     }
   }
 
+  // TODO: add code for modal edit to remove old Job
   const handleJobSubmit = (data) => {
     const endDate = new Date(data.endDate)
     let currentDate = new Date(data.startDate)
