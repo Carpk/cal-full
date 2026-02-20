@@ -12,11 +12,6 @@ import gear from '../assets/gear.svg'
 export default function SidebarJob({ job, editJob }) {
   
 
-  const toggleModal = () => {
-
-    editJob()
-  }
-  
   return (
     <Card key={ job.id } className='mb-5' >
       <Card.Body>
@@ -24,7 +19,7 @@ export default function SidebarJob({ job, editJob }) {
           {job.title}
           <button className="btn-link flt-right" onClick={() => editJob(job.id)}>
             <img src={ gear } 
-              alt="lock icon"
+              alt="gear icon"
               style={{'marginTop': '-4px'}}
               width="22"
             />

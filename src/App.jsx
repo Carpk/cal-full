@@ -14,8 +14,8 @@ import interactionPlugin from "@fullcalendar/interaction"
 import { INITIAL_EVENTS } from './event-utils'
 import SidebarJob from './components/SidebarEvent'
 import JobModal from "./components/JobModal";
-import NewJobModal from "./components/JobModalNew";
-import EditJobModal from "./components/JobModalEdit";
+// import NewJobModal from "./components/JobModalNew";
+// import EditJobModal from "./components/JobModalEdit";
 import DateModal from "./components/DateModal";
 import plusSquare from './assets/plus-square.svg'
 
@@ -28,12 +28,8 @@ let jobGuid = 0
 const App = () => {
   const [context, setContext] = useState();
   
-  const [showJobModal, setShowJobModal] = useState(false); // old Job modal
-    // const [assignJobDates, setAssignJobDates] = useState(false);
-
+  const [showJobModal, setShowJobModal] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
-  const [showNewJobModal, setShowNewJobModal] = useState(false);
-  const [showEditJobModal, setShowEditJobModal] = useState(false);
 
   // const dataStruct = [[],[],[]]
   const [modalData, setModalData] = useState({data: [[],[],[]]})
@@ -85,8 +81,8 @@ const App = () => {
 
 
 
-  const storeJobs = async () => {
-    const res = await monday.storage.setItem('jobs', JSON.stringify(currentJobs))
+  const storeJobs = async (jobs) => {
+    const res = await monday.storage.setItem('jobs', JSON.stringify(jobs))
     console.log("store res: ", res);
   }
 
@@ -101,21 +97,12 @@ const App = () => {
     // console.log("retriv res: ", res?.data?.value);
   }
 
-  const toggleJobsModal = () => {
+  const toggleJobModal = () => {
     setShowJobModal(!showJobModal);
   };
 
-  const toggleNewJobModal = () => {
-    setShowNewJobModal(!showNewJobModal);
-  };
-
-
   const toggleDateModal = () => {
     setShowDateModal(!showDateModal);
-  };
-
-  const toggleEditJobModal = () => {
-    setShowEditJobModal(!showEditJobModal);
   };
 
   
@@ -166,18 +153,16 @@ const App = () => {
   }
 
   const handleNewJobModal = (selectInfo) => {
-    // console.log(selectInfo.end)
-
     setJobModalData({
-      start: selectInfo.start.toISOString().replace(/T.*$/, ''), 
-      end: selectInfo.end.toISOString().replace(/T.*$/, ''), 
-      color: colors[jobGuid%colors.length], 
+      start: selectInfo.start.toISOString().replace(/T.*$/, ''),
+      end: selectInfo.end.toISOString().replace(/T.*$/, ''),
+      color: colors[jobGuid%colors.length],
       data: [[],[],[]]
     })
 
     // sleep(10000);
     if (!showDateModal) {
-      toggleNewJobModal()
+      toggleJobModal()
     }
   }
 
@@ -187,7 +172,11 @@ const App = () => {
     let currentDate = new Date(data.startDate)
     let tempSched = dailySchedule
 
-    setCurrentJobs([
+    // if (data.isEdit) {
+    //   // Remove old Job from currentJobs
+    // }
+
+    const newJobs = [
       ...currentJobs,
       {
         id: String(jobGuid++),
@@ -198,7 +187,10 @@ const App = () => {
         data: [...data.assignees],
         color: data.color
       }
-    ])
+    ]
+
+    setCurrentJobs(newJobs)
+    storeJobs(newJobs)
 
     while (currentDate <= endDate) {
       const formattedDate = currentDate.toISOString().replace(/T.*$/, '')
@@ -221,42 +213,22 @@ const App = () => {
     }
     
     setDailySchedule([...tempSched])
-    storeJobs()
   }
 
   const handleEditJobModal = (jobId) => {
-    // console.log(jobId)
-
-    // find job in jobList > build modal data
     const job = currentJobs.find(u => u.id === jobId)
-    // console.log(job)
-
-    setJobModalData(job)
-    // setJobModalData({
-    //   title: job.title,
-    //   start: job.start, 
-    //   end: job.end,
-    //   assignees: job.assignees,
-    //   data: job.data,
-    //   color: job.color
-    // })
-
-    
-    toggleEditJobModal()
-    
-
-    // setModalData({ start: selectInfo.start, end: selectInfo.end, data: [[[],[],[]]]})
-    // toggleEditJobModal()
+    setJobModalData({...job})
+    toggleJobModal()
   }
 
 
-  const handleEditJobSubmit = (data) => {
-    jobGuid = jobGuid + 1
+  // const handleEditJobSubmit = (data) => {
+  //   jobGuid = jobGuid + 1
 
-    data.id = jobGuid
-    data.color = colors[jobGuid%colors.length]
-    setCurrentJobs([...currentJobs, data])
-  }
+  //   data.id = jobGuid
+  //   data.color = colors[jobGuid%colors.length]
+  //   setCurrentJobs([...currentJobs, data])
+  // }
 
   const customRender = (args) => {
     const data = args.event.extendedProps
@@ -350,17 +322,10 @@ const App = () => {
         onDateSubmit={handleDateSubmit}
       />
 
-      <NewJobModal 
-        show={showNewJobModal} 
-        dateEvent={jobModalData}
-        handleClose={toggleNewJobModal}
-        handleReturn={handleJobSubmit}
-      />
-      <EditJobModal 
-        show={showEditJobModal} 
-        // setJobTitle={setJobTitle}
-        existingJob={jobModalData}
-        handleClose={toggleEditJobModal}
+      <JobModal
+        show={showJobModal}
+        jobData={jobModalData}
+        handleClose={toggleJobModal}
         handleReturn={handleJobSubmit}
       />
     </div>

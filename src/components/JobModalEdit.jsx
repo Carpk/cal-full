@@ -64,7 +64,7 @@ export default function EditJobModal({ show, existingJob, handleClose, handleRet
   };
 
   const rmEle = ( r) => {
-    assignees.splice(r, 1)
+    setAssignees(prev => prev.filter((_, i) => i !== r))
   }
 
 

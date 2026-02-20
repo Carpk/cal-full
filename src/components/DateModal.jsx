@@ -37,7 +37,7 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
   }
 
   const addCol = () => {
-    dateData.push([])
+    setDateData(prev => [...prev, []])
   }
 
   const rmEle = (c, r) => {
