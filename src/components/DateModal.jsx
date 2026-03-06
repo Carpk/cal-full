@@ -5,19 +5,25 @@ import Form from 'react-bootstrap/Form';
 import ListGroup from 'react-bootstrap/ListGroup';
 
 import minusCircle from '../assets/dash-circle.svg'
+import gear from '../assets/gear.svg'
 
-export default function DateModal({ show, dateEvent, handleClose, onDateSubmit}) {
+const COL_LABELS = ['Jobs', '1', '2', '3']
+
+export default function DateModal({ show, dateEvent, handleClose, onDateSubmit }) {
   const [dateContent, setDateContent] = useState([[],[],[]]);
   const [inputValue, setInputValue] = useState('');
-  const [colNum, setColNum] = useState(1)
+  const [colNum, setColNum] = useState(1);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     setDateContent(dateEvent.data)
+    setEditMode(false)
   }, [dateEvent])
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      if (!inputValue) return;
       setDateContent(prev => prev.map((col, i) => i === colNum ? [...col, inputValue] : col))
       setInputValue('')
     }
@@ -27,10 +33,6 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
     onDateSubmit(dateEvent.id, dateEvent.start, dateContent);
     handleClose();
   };
-
-  const handleOptionChange = (val) => {
-    setColNum(val)
-  }
 
   const addCol = () => {
     if (dateContent.length < 4) {
@@ -51,92 +53,113 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
     setDateContent(prev => prev.map((col, i) => i === c ? col.filter((_, j) => j !== r) : col))
   }
 
+  const modalSize = dateContent.length >= 4 ? 'xl' : 'lg'
 
   return (
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={show} onHide={handleClose} size={modalSize} centered>
       <Modal.Header closeButton>
         <Modal.Title>{dateEvent.textDate}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form>
-          <div className="row mb-5">
-            { dateContent.map((dateColumn, colIndex) => (
-              <div
-                key={"col"+colIndex}
-                className="col"
-                style={{ boxShadow: colNum === colIndex ? '0px 4px 8px black' : '' }}
-                onClick={() => handleOptionChange(colIndex)}
-              >
-                <ListGroup.Item key={"colName"+colIndex}>
-                  col {colIndex}
-                  {colIndex > 0 && (
-                    <img src={minusCircle}
-                      alt="remove column"
-                      onClick={(e) => { e.stopPropagation(); rmCol(colIndex); }}
-                      style={{ marginLeft: '4px' }}
-                      width="11"
-                    />
-                  )}
-                </ListGroup.Item>
-                { dateColumn.map((name, index) => (
-                  <ListGroup.Item key={"li"+index}>
-                    <span style={name.color ? { color: name.color } : {}}>{name.label ?? name}</span>
-                    <img src={minusCircle}
-                      alt="remove a name"
-                      onClick={(e) => { e.stopPropagation(); rmEle(colIndex, index); }}
-                      style={{ marginLeft: '4px' }}
-                      width="11"
-                    />
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {dateContent.map((dateColumn, colIndex) => (
+            <div
+              key={"col" + colIndex}
+              className="col"
+              style={{
+                cursor: colIndex > 0 ? 'pointer' : 'default',
+                boxShadow: colNum === colIndex ? '0px 4px 8px rgba(0,0,0,0.3)' : '',
+                borderRadius: '6px',
+                padding: '8px',
+                minHeight: '80px',
+              }}
+              onClick={() => colIndex > 0 && setColNum(colIndex)}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <strong style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {COL_LABELS[colIndex] ?? colIndex}
+                </strong>
+                {editMode && colIndex > 0 && (
+                  <button
+                    className="btn-link"
+                    style={{ color: '#dc3545', fontSize: '1rem', lineHeight: 1 }}
+                    onClick={(e) => { e.stopPropagation(); rmCol(colIndex); }}
+                    title="Remove column"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+
+              <ListGroup variant="flush">
+                {dateColumn.map((name, index) => (
+                  <ListGroup.Item
+                    key={"li" + index}
+                    style={{ background: 'transparent', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0' }}
+                  >
+                    <span style={name.color ? { color: name.color } : {}}>
+                      {name.label ?? name}
+                    </span>
+                    {editMode && (
+                      <img
+                        src={minusCircle}
+                        alt="remove"
+                        onClick={(e) => { e.stopPropagation(); rmEle(colIndex, index); }}
+                        style={{ marginLeft: '6px', cursor: 'pointer', flexShrink: 0 }}
+                        width="11"
+                      />
+                    )}
                   </ListGroup.Item>
                 ))}
-              </div>
-            ))}
-          </div>
+              </ListGroup>
 
-          <div className="row mb-5">
-            <div className="col">
-              { dateContent.map((_, colIndex) => (
-                colIndex > 0 && (
-                  <Form.Check
-                    key={colIndex}
-                    label={`Column ${colIndex}`}
-                    name="group1"
-                    type='radio'
-                    checked={colNum === colIndex}
-                    id={`radio-${colIndex}`}
-                    onChange={() => handleOptionChange(colIndex)}
-                  />
-                )
-              ))}
-              {dateContent.length < 4 && (
-                <Button variant="link" size="sm" className="p-0 mt-1" onClick={addCol}>
-                  + Add Column
-                </Button>
+              {colIndex === colNum && (
+                <Form.Control
+                  style={{ marginTop: '8px' }}
+                  size="sm"
+                  type="text"
+                  value={inputValue}
+                  onKeyDown={handleKeyDown}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Add name..."
+                  onClick={(e) => e.stopPropagation()}
+                  autoFocus
+                />
               )}
             </div>
-            <div className="col">
-              <Form.Control
-                aria-label="Add employee"
-                size="sm"
-                type="text"
-                value={inputValue}
-                onKeyDown={handleKeyDown}
-                onChange={(e) => setInputValue(e.target.value)}
-                autoFocus
-              />
-            </div>
-            <div className="col"></div>
-          </div>
+          ))}
+        </div>
 
-        </Form>
+        {dateContent.length < 4 && (
+          <div style={{ marginTop: '12px' }}>
+            <Button variant="link" size="sm" style={{ padding: 0 }} onClick={addCol}>
+              + Add Column
+            </Button>
+          </div>
+        )}
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={handleSubmit}>
-          Save Changes
-        </Button>
+
+      <Modal.Footer style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <button
+          className="btn-link"
+          onClick={() => setEditMode(prev => !prev)}
+          title="Toggle edit mode"
+        >
+          <img
+            src={gear}
+            alt="toggle edit mode"
+            width="20"
+            style={{ opacity: editMode ? 1 : 0.35 }}
+          />
+        </button>
+        <div>
+          <Button variant="secondary" onClick={handleClose} style={{ marginRight: '8px' }}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSubmit}>
+            Save Changes
+          </Button>
+        </div>
       </Modal.Footer>
     </Modal>
   )

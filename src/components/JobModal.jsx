@@ -54,7 +54,7 @@ export default function JobModal({ show, jobData, handleClose, handleReturn, han
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group className="mb-3" controlId="formJobName">
+          <Form.Group style={{ marginBottom: '12px' }} controlId="formJobName">
             <Form.Control
               type="text"
               value={title}
@@ -115,7 +115,7 @@ export default function JobModal({ show, jobData, handleClose, handleReturn, han
           />
         </Form>
       </Modal.Body>
-      <Modal.Footer className="d-flex justify-content-between">
+      <Modal.Footer style={{ display: 'flex', justifyContent: 'space-between' }}>
         {jobData.id
           ? <Button variant="danger" onClick={() => { handleClose(); handleDelete(jobData.id); }}>
               Delete Job
@@ -123,7 +123,7 @@ export default function JobModal({ show, jobData, handleClose, handleReturn, han
           : <span />
         }
         <div>
-          <Button variant="secondary" onClick={handleClose} className="me-2">
+          <Button variant="secondary" onClick={handleClose} style={{ marginRight: '8px' }}>
             Close
           </Button>
           <Button variant="primary" onClick={handleSubmit}>
