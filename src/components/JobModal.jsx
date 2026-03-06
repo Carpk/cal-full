@@ -6,7 +6,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 
 import minusCircle from '../assets/dash-circle.svg'
 
-export default function JobModal({ show, jobData, handleClose, handleReturn }) {
+export default function JobModal({ show, jobData, handleClose, handleReturn, handleDelete }) {
   const [title, setTitle] = useState('');
   const [color, setColor] = useState('#000000');
   const [startDate, setStartDate] = useState('');
@@ -37,6 +37,7 @@ export default function JobModal({ show, jobData, handleClose, handleReturn }) {
   const handleSubmit = () => {
     handleClose();
     handleReturn({
+      id: jobData.id,
       title,
       startDate,
       endDate,
@@ -114,13 +115,21 @@ export default function JobModal({ show, jobData, handleClose, handleReturn }) {
           />
         </Form>
       </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-        <Button variant="primary" onClick={handleSubmit}>
-          Save Changes
-        </Button>
+      <Modal.Footer className="d-flex justify-content-between">
+        {jobData.id
+          ? <Button variant="danger" onClick={() => { handleClose(); handleDelete(jobData.id); }}>
+              Delete Job
+            </Button>
+          : <span />
+        }
+        <div>
+          <Button variant="secondary" onClick={handleClose} className="me-2">
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSubmit}>
+            Save Changes
+          </Button>
+        </div>
       </Modal.Footer>
     </Modal>
   );

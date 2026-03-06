@@ -82,19 +82,24 @@ const App = () => {
 
 
   const storeJobs = async (jobs) => {
-    const res = await monday.storage.setItem('jobs', JSON.stringify(jobs))
-    console.log("store res: ", res);
+    await monday.storage.instance.setItem('jobs', JSON.stringify(jobs))
+  }
+
+  const storeDailySchedule = async (schedule) => {
+    await monday.storage.instance.setItem('dailySchedule', JSON.stringify(schedule))
   }
 
   const retrieveJobs = async () => {
-    const res = await monday.storage.getItem('jobs');
+    const [jobsRes, schedRes] = await Promise.all([
+      monday.storage.instance.getItem('jobs'),
+      monday.storage.instance.getItem('dailySchedule'),
+    ]);
 
-    const raw = res?.data?.value;
-    const jobs = raw ? JSON.parse(raw) : currentJobs;
-    console.log(jobs)
-    // setCurrentJobs(jobs);
+    const rawJobs = jobsRes?.data?.value;
+    if (rawJobs) setCurrentJobs(JSON.parse(rawJobs));
 
-    // console.log("retriv res: ", res?.data?.value);
+    const rawSched = schedRes?.data?.value;
+    if (rawSched) setDailySchedule(JSON.parse(rawSched));
   }
 
   const toggleJobModal = () => {
@@ -126,21 +131,22 @@ const App = () => {
     setModalData({id: dateData.id, start: dateData.start, dateStr: dateData.dateStr, data: dateData.data})
     
     setShowDateModal(true)
-    retrieveJobs()
   }
 
   const handleDateSubmit = (id, date, data) => {
     // clear the existing date assignments
     const filteredJobs = dailySchedule.filter(item => item.id !== id);
 
-    setDailySchedule([
+    const newSchedule = [
       ...filteredJobs,
       {
         id: id,
         start: date,
         data: data,
       }
-    ])
+    ]
+    setDailySchedule(newSchedule)
+    storeDailySchedule(newSchedule)
   }
 
   const handleNewJobButton = () => {
@@ -172,14 +178,16 @@ const App = () => {
     let currentDate = new Date(data.startDate)
     let tempSched = dailySchedule
 
-    // if (data.isEdit) {
-    //   // Remove old Job from currentJobs
-    // }
+    const baseJobs = data.id
+      ? currentJobs.filter(job => job.id !== data.id)
+      : currentJobs;
+
+    const newJobId = data.id ? data.id : String(jobGuid++)
 
     const newJobs = [
-      ...currentJobs,
+      ...baseJobs,
       {
-        id: String(jobGuid++),
+        id: newJobId,
         title: data.title,
         assignees: data.assignees,
         start: data.startDate, // What format to save these in?
@@ -199,12 +207,12 @@ const App = () => {
       const foundData = dailySchedule.find(u => u.start === formattedDate)
       const dayData = foundData !== undefined ? foundData : {
         id: String(eventGuid++),
-        start: formattedDate + 'T12:00:00', // needed format: yyy-mm-ddT12:00:00
+        start: formattedDate + 'T12:00:00', // FullCal format: yyy-mm-ddT12:00:00
         textDate: new Date(currentDate).toDateString(),
         data: [[],[],[]] // rename
       };
 
-      dayData.data[0].push(data.title)
+      dayData.data[0].push({ label: data.title, jobId: newJobId, color: data.color })
       
       const filteredSched = tempSched.filter(event => event.start !== formattedDate);
       tempSched = [...filteredSched, dayData]
@@ -213,6 +221,7 @@ const App = () => {
     }
     
     setDailySchedule([...tempSched])
+    storeDailySchedule([...tempSched])
   }
 
   const handleEditJobModal = (jobId) => {
@@ -221,14 +230,19 @@ const App = () => {
     toggleJobModal()
   }
 
+  const handleDeleteJob = (jobId) => {
+    const newJobs = currentJobs.filter(job => job.id !== jobId)
+    setCurrentJobs(newJobs)
+    storeJobs(newJobs)
 
-  // const handleEditJobSubmit = (data) => {
-  //   jobGuid = jobGuid + 1
+    const newSchedule = dailySchedule.map(day => ({
+      ...day,
+      data: day.data.map(col => col.filter(item => item?.jobId !== jobId))
+    }))
+    setDailySchedule(newSchedule)
+    storeDailySchedule(newSchedule)
+  }
 
-  //   data.id = jobGuid
-  //   data.color = colors[jobGuid%colors.length]
-  //   setCurrentJobs([...currentJobs, data])
-  // }
 
   const customRender = (args) => {
     const data = args.event.extendedProps
@@ -236,10 +250,10 @@ const App = () => {
     const newCol = (names, pref) => {
       return (
         <div key={pref+"col"} className="col">
-          {names.map((name, index) => (
+          {names.map((item, index) => (
             <div key={pref + index} className="row">
-              <div className="col">
-                { name }
+              <div className="col" style={item.color ? { color: item.color } : {}}>
+                { item.label ?? item }
               </div>
             </div>
           ))}
@@ -327,6 +341,7 @@ const App = () => {
         jobData={jobModalData}
         handleClose={toggleJobModal}
         handleReturn={handleJobSubmit}
+        handleDelete={handleDeleteJob}
       />
     </div>
   );
@@ -358,21 +373,6 @@ export default App;
         //   events={jobsData} 
         //   //events={datesHash}
         // />
-
-  // CODE FOR USING QUERY SELECTORS
-  // const handleJobData = (data) => {
-  //   const targetDate = data['startStr']
-  //   const elements = document.querySelectorAll(`[data-date="${targetDate}"]`);
-
-  //   const template = '<div class="col"></div><div class="col"></div><div class="col"></div>';
-  //   const jobBox = elements[0].lastChild.childNodes[1]
-  //   // elements[0].lastChild.lastChild.innerHTML = "hi";
-  //   jobBox.classList.add("row");
-  //   jobBox.innerHTML = template
-    
-  //   console.log(jobBox);
-  // };
-
 
   // CODE FOR CREATING FULLCAL EVENT
   // function handleMultipleDates(selectInfo) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Modal, Button } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
@@ -7,28 +7,24 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import minusCircle from '../assets/dash-circle.svg'
 
 export default function DateModal({ show, dateEvent, handleClose, onDateSubmit}) {
-  const [dateData, setDateData] = useState([[],[],[]]);
+  const [dateContent, setDateContent] = useState([[],[],[]]);
   const [inputValue, setInputValue] = useState('');
   const [colNum, setColNum] = useState(1)
 
-
   useEffect(() => {
-    setDateData(dateEvent.data)
-
+    setDateContent(dateEvent.data)
   }, [dateEvent])
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      dateData[colNum].push(inputValue)
-
+      setDateContent(prev => prev.map((col, i) => i === colNum ? [...col, inputValue] : col))
       setInputValue('')
     }
   };
 
   const handleSubmit = () => {
-    onDateSubmit(dateEvent.id, dateEvent.start, dateData);
-
+    onDateSubmit(dateEvent.id, dateEvent.start, dateContent);
     handleClose();
   };
 
@@ -37,11 +33,22 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
   }
 
   const addCol = () => {
-    setDateData(prev => [...prev, []])
+    if (dateContent.length < 4) {
+      setDateContent(prev => [...prev, []])
+    }
+  }
+
+  // col 0 is reserved for job entries — cannot be removed
+  const rmCol = (colIndex) => {
+    if (colIndex === 0) return
+    setDateContent(prev => prev.filter((_, i) => i !== colIndex))
+    if (colNum >= colIndex && colNum > 1) {
+      setColNum(colNum - 1)
+    }
   }
 
   const rmEle = (c, r) => {
-    dateData[c].splice(r, 1)
+    setDateContent(prev => prev.map((col, i) => i === c ? col.filter((_, j) => j !== r) : col))
   }
 
 
@@ -53,53 +60,63 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
       <Modal.Body>
         <Form>
           <div className="row mb-5">
-            { dateData.map((dateColumn, colIndex) => (
+            { dateContent.map((dateColumn, colIndex) => (
               <div
                 key={"col"+colIndex}
-                className="col" 
-                style={{ 'boxShadow': colNum === colIndex ? '0px 4px 8px black': ''}}
+                className="col"
+                style={{ boxShadow: colNum === colIndex ? '0px 4px 8px black' : '' }}
                 onClick={() => handleOptionChange(colIndex)}
               >
-                <ListGroup.Item key={"colName"+colIndex}>col {colIndex}</ListGroup.Item>
+                <ListGroup.Item key={"colName"+colIndex}>
+                  col {colIndex}
+                  {colIndex > 0 && (
+                    <img src={minusCircle}
+                      alt="remove column"
+                      onClick={(e) => { e.stopPropagation(); rmCol(colIndex); }}
+                      style={{ marginLeft: '4px' }}
+                      width="11"
+                    />
+                  )}
+                </ListGroup.Item>
                 { dateColumn.map((name, index) => (
-                  <ListGroup.Item  key={"li"+index}>
-                    {name}
-                    <img src={minusCircle} 
+                  <ListGroup.Item key={"li"+index}>
+                    <span style={name.color ? { color: name.color } : {}}>{name.label ?? name}</span>
+                    <img src={minusCircle}
                       alt="remove a name"
-                      onClick={() => rmEle(colIndex, index)}
-                      style={{'marginLeft': '4px'}}
-                      width="11" 
+                      onClick={(e) => { e.stopPropagation(); rmEle(colIndex, index); }}
+                      style={{ marginLeft: '4px' }}
+                      width="11"
                     />
                   </ListGroup.Item>
                 ))}
               </div>
             ))}
           </div>
-          
+
           <div className="row mb-5">
-            
             <div className="col">
-              <Form.Check
-                label="Column 1"
-                name="group1"
-                type='radio'
-                checked={ colNum === 1}
-                id={`radio-1`}
-                onChange={() => handleOptionChange(1)}
-              />
-              <Form.Check
-                label="Column 2"
-                name="group1"
-                type='radio'
-                checked={colNum === 2}
-                id={`radio-2`}
-                onChange={() => handleOptionChange(2)}
-              />
+              { dateContent.map((_, colIndex) => (
+                colIndex > 0 && (
+                  <Form.Check
+                    key={colIndex}
+                    label={`Column ${colIndex}`}
+                    name="group1"
+                    type='radio'
+                    checked={colNum === colIndex}
+                    id={`radio-${colIndex}`}
+                    onChange={() => handleOptionChange(colIndex)}
+                  />
+                )
+              ))}
+              {dateContent.length < 4 && (
+                <Button variant="link" size="sm" className="p-0 mt-1" onClick={addCol}>
+                  + Add Column
+                </Button>
+              )}
             </div>
             <div className="col">
               <Form.Control
-                aria-label="Small"
-                aria-describedby="inputGroup-sizing-sm"
+                aria-label="Add employee"
                 size="sm"
                 type="text"
                 value={inputValue}
@@ -110,7 +127,7 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
             </div>
             <div className="col"></div>
           </div>
-          
+
         </Form>
       </Modal.Body>
       <Modal.Footer>
@@ -124,50 +141,3 @@ export default function DateModal({ show, dateEvent, handleClose, onDateSubmit})
     </Modal>
   )
 }
-
-
-
-            // {/* <div className="col" >
-            //   { jobs.map((name, index) => (
-            //     <ListGroup.Item key={index}>{name}</ListGroup.Item>
-            //   ))}
-            // </div>
-            // <div className="col nb-height" 
-            //   style={{ 'boxShadow': colNum === 1 ? '0px 4px 8px black': ''}}
-            //   onClick={() => handleOptionChange(1)}
-            // >
-            //   { assignments1.map((name, index) => (
-            //     <ListGroup.Item key={index}>{name}</ListGroup.Item>
-            //   ))}
-            // </div>
-            // <div 
-            //   className="col nb-height" 
-            //   style={{ 'boxShadow': colNum === 2 ? '0px 4px 8px black': ''}}
-            //   onClick={() => handleOptionChange(2)}
-            // >
-            //   { assignments2.map((name, index) => (
-            //     <ListGroup.Item key={index}>{name}</ListGroup.Item>
-            //   ))}
-            // </div> */}
-
-
- //             {/* style={{ box-shadow: !colOne ? '0px 4px 8px blue': ''}} */}
-
-
-          // <div className="row mb-5">
-          //   <div className="col">
-          //     { assignments.map((name, index) => (
-          //       <ListGroup.Item key={index}>{name}</ListGroup.Item>
-          //     ))}
-          //   </div>
-          //   <div className="col">
-          //     { assignments.map((name, index) => (
-          //       <ListGroup.Item key={index}>{name}</ListGroup.Item>
-          //     ))}
-          //   </div>
-          // </div>
-
-
-
-          // box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
-          // box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
