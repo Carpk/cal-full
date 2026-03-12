@@ -204,7 +204,7 @@ const App = () => {
       const formattedDate = currentDate.toISOString().replace(/T.*$/, '')
       // .toISOString().replace(/T.*$/, '')
       
-      const foundData = dailySchedule.find(u => u.start === formattedDate)
+      const foundData = tempSched.find(u => u.start.replace(/T.*$/, '') === formattedDate)
       const dayData = foundData !== undefined ? foundData : {
         id: String(eventGuid++),
         start: formattedDate + 'T12:00:00', // FullCal format: yyy-mm-ddT12:00:00
@@ -214,10 +214,10 @@ const App = () => {
 
       dayData.data[0].push({ label: data.title, jobId: newJobId, color: data.color })
       
-      const filteredSched = tempSched.filter(event => event.start !== formattedDate);
+      const filteredSched = tempSched.filter(event => event.start.replace(/T.*$/, '') !== formattedDate);
       tempSched = [...filteredSched, dayData]
 
-      currentDate.setDate(currentDate.getDate() + 1); 
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
     
     setDailySchedule([...tempSched])
